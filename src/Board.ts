@@ -94,7 +94,22 @@ export class Board {
 	}
 
 	*frameCoroutine(): IterableIterator<void> {
-		yield* this.gameFlowCoroutine();
+		// TODO: Move to a member, just like in `Piece`.
+		const gameFlowCoroutine = this.gameFlowCoroutine();
+
+		// TODO: Abstract away.
+		// Run the gameflow and pieces coroutines concurrently.
+		for (;;) {
+			const deltaTime: number = yield;
+
+			gameFlowCoroutine.next(deltaTime);
+
+			for (const piece of this.pieces) {
+				if (piece) {
+					piece.frameCoroutine.next(deltaTime);
+				}
+			}
+		}
 	}
 
 	private *gameFlowCoroutine() {
