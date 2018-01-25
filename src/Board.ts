@@ -125,6 +125,7 @@ export class Board {
 	}
 
 	private *gameFlowCoroutine() {
+		// TODO: Must add colors in pairs initially, or board is not solvable.
 		// Add initial pieces.
 		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; ++i) {
 			this.addPiece(this.randomColor(false));
