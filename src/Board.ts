@@ -54,10 +54,16 @@ export class Board {
 
 	pick(index: number) {
 		const pickedPiece = this.pieces[index];
+		if (!pickedPiece) {
+			return;
+		}
+
 		if (!this.pickedA) {
 			this.pickedA = pickedPiece;
+			pickedPiece.setPicked(true);
 		} else if (!this.pickedB && pickedPiece != this.pickedA) {
 			this.pickedB = pickedPiece;
+			pickedPiece.setPicked(true);
 		}
 	}
 
@@ -157,7 +163,9 @@ export class Board {
 					}
 				}
 				// Reset the picked pieces.
+				this.pickedA.setPicked(false);
 				this.pickedA = undefined;
+				this.pickedB.setPicked(false);
 				this.pickedB = undefined;
 			}
 			yield;
