@@ -1,7 +1,12 @@
 import { Coord } from "./Coord";
 import { GameMode } from "./GameMode";
 import { Piece } from "./Piece";
-import { waitMs, range, randomElement } from "./functions";
+import {
+	waitMs,
+	range,
+	randomElement,
+	fisherYatesArrayShuffle,
+} from "./functions";
 
 export class Board {
 	gameMode: GameMode;
@@ -131,10 +136,16 @@ export class Board {
 	}
 
 	*gameFlowCoroutine() {
-		// TODO: Must add colors in pairs initially, or board is not solvable.
 		// Add initial pieces.
-		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; ++i) {
-			this.addPiece(this.randomColor());
+		const colors = [];
+		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; i += 2) {
+			colors.push(this.randomColor());
+		}
+		// Must add colors in pairs, or board is not solvable.
+		const colorPairs = [...colors, ...colors];
+		fisherYatesArrayShuffle(colorPairs);
+		for (const color of colorPairs) {
+			this.addPiece(color);
 			yield* waitMs(100);
 		}
 
