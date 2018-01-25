@@ -14,3 +14,7 @@ export function* range(from: number, to: number): IterableIterator<number> {
 		yield i;
 	}
 }
+
+export function randomElement<T>(array: ReadonlyArray<T>) {
+	return array[Math.floor(Math.random() * array.length)] as T | undefined;
+}

@@ -1,7 +1,7 @@
 import { Coord } from "./Coord";
 import { GameMode } from "./GameMode";
 import { Piece } from "./Piece";
-import { waitMs, range } from "./functions";
+import { waitMs, range, randomElement } from "./functions";
 
 export class Board {
 	gameMode: GameMode;
@@ -100,16 +100,16 @@ export class Board {
 		return false;
 	}
 
-	randomColor(limitToExisting: boolean) {
-		const possibleColors = limitToExisting
-			? Array.from(
-					new Set(
-						this.pieces.filter(piece => !!piece).map(piece => piece!.color),
-					),
-				)
-			: Array.from(range(0, this.numColors));
+	randomColorFromExisting() {
+		const possibleColors = Array.from(
+			new Set(this.pieces.filter(piece => !!piece).map(piece => piece!.color)),
+		);
+		return randomElement(possibleColors);
+	}
 
-		return possibleColors[Math.floor(Math.random() * possibleColors.length)];
+	randomColor() {
+		const possibleColors = Array.from(range(0, this.numColors));
+		return randomElement(possibleColors)!;
 	}
 
 	*frameCoroutine(): IterableIterator<void> {
@@ -135,7 +135,7 @@ export class Board {
 		// TODO: Must add colors in pairs initially, or board is not solvable.
 		// Add initial pieces.
 		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; ++i) {
-			this.addPiece(this.randomColor(false));
+			this.addPiece(this.randomColor());
 			yield* waitMs(100);
 		}
 
@@ -156,7 +156,9 @@ export class Board {
 					this.gameMode.onUnlockedPair(this);
 				} else {
 					// Punish player.
-					const addedPieceSuccessfully = this.addPiece(this.randomColor(true));
+					const addedPieceSuccessfully = this.addPiece(
+						this.randomColorFromExisting()!,
+					);
 					// Detect game over.
 					if (!addedPieceSuccessfully) {
 						this.gameMode.onGameOver(this);
