@@ -60,7 +60,7 @@ export class Board {
 		}
 	}
 
-	addPiece() {
+	addPiece(color: number) {
 		const pieceAddOrder = Array.from(
 			range(0, Board.size.x * Board.size.y),
 		).sort((a, b) => {
@@ -83,7 +83,7 @@ export class Board {
 			if (!this.pieces[index]) {
 				const button = Board.getButtonForPieceIndex(index);
 				this.pieces[index] = new Piece({
-					color: Math.floor(Math.random() * this.numColors),
+					color,
 					button,
 				});
 				return true;
@@ -91,6 +91,18 @@ export class Board {
 		}
 
 		return false;
+	}
+
+	randomColor(limitToExisting: boolean) {
+		const possibleColors = limitToExisting
+			? Array.from(
+					new Set(
+						this.pieces.filter(piece => !!piece).map(piece => piece!.color),
+					),
+				)
+			: Array.from(range(0, this.numColors));
+
+		return possibleColors[Math.floor(Math.random() * possibleColors.length)];
 	}
 
 	*frameCoroutine(): IterableIterator<void> {
@@ -115,7 +127,7 @@ export class Board {
 	private *gameFlowCoroutine() {
 		// Add initial pieces.
 		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; ++i) {
-			this.addPiece();
+			this.addPiece(this.randomColor(false));
 			yield* waitMs(100);
 		}
 
@@ -136,7 +148,7 @@ export class Board {
 					this.gameMode.onUnlockedPair(this);
 				} else {
 					// Punish player.
-					const addedPieceSuccessfully = this.addPiece();
+					const addedPieceSuccessfully = this.addPiece(this.randomColor(true));
 					// Detect game over.
 					if (!addedPieceSuccessfully) {
 						this.gameMode.onGameOver(this);
