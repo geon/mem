@@ -183,10 +183,5 @@ export class Board {
 				piece.draw(context);
 			}
 		}
-
-		const pickedA = document.getElementById("pickedA")!;
-		const pickedB = document.getElementById("pickedB")!;
-		pickedA.textContent = this.pickedA ? this.pickedA.color.toString() : "";
-		pickedB.textContent = this.pickedB ? this.pickedB.color.toString() : "";
 	}
 }
