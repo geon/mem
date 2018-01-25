@@ -56,7 +56,7 @@ export class Board {
 		const pickedPiece = this.pieces[index];
 		if (!this.pickedA) {
 			this.pickedA = pickedPiece;
-		} else if (!this.pickedB) {
+		} else if (!this.pickedB && pickedPiece != this.pickedA) {
 			this.pickedB = pickedPiece;
 		}
 	}
