@@ -116,18 +116,17 @@ export class Board {
 	*makeFrameCoroutine(): IterableIterator<void> {
 		const gameFlowCoroutine = this.gameFlowCoroutine();
 
-		// TODO: Abstract away.
 		// Run the gameflow and pieces coroutines concurrently.
 		for (;;) {
 			const deltaTime: number = yield;
 
-			gameFlowCoroutine.next(deltaTime);
+			const pieceCoroutines = this.pieces
+				.filter(piece => !!piece)
+				.map(piece => piece!.frameCoroutine);
 
-			for (const piece of this.pieces) {
-				if (piece) {
-					piece.frameCoroutine.next(deltaTime);
-				}
-			}
+			const allCoroutines = [gameFlowCoroutine, ...pieceCoroutines];
+
+			allCoroutines.forEach(coroutine => coroutine.next(deltaTime));
 		}
 	}
 
