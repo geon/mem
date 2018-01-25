@@ -136,18 +136,7 @@ export class Board {
 	}
 
 	*gameFlowCoroutine() {
-		// Add initial pieces.
-		const colors = [];
-		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; i += 2) {
-			colors.push(this.randomColor());
-		}
-		// Must add colors in pairs, or board is not solvable.
-		const colorPairs = [...colors, ...colors];
-		fisherYatesArrayShuffle(colorPairs);
-		for (const color of colorPairs) {
-			this.addPiece(color);
-			yield* waitMs(100);
-		}
+		yield* this.initializationCoroutine();
 
 		for (;;) {
 			if (this.pickedA && this.pickedB) {
@@ -181,6 +170,21 @@ export class Board {
 				this.pickedB = undefined;
 			}
 			yield;
+		}
+	}
+
+	*initializationCoroutine() {
+		// Add initial pieces.
+		const colors = [];
+		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; i += 2) {
+			colors.push(this.randomColor());
+		}
+		// Must add colors in pairs, or board is not solvable.
+		const colorPairs = [...colors, ...colors];
+		fisherYatesArrayShuffle(colorPairs);
+		for (const color of colorPairs) {
+			this.addPiece(color);
+			yield* waitMs(100);
 		}
 	}
 
