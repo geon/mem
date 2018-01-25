@@ -5,7 +5,7 @@ import { waitMs, range, randomElement } from "./functions";
 
 export class Board {
 	gameMode: GameMode;
-
+	frameCoroutine: IterableIterator<void>;
 	pieces: Array<Piece | undefined>;
 	pickedA: Piece | undefined;
 	pickedB: Piece | undefined;
@@ -15,6 +15,7 @@ export class Board {
 	constructor(options: { gameMode: GameMode }) {
 		this.gameMode = options.gameMode;
 
+		this.frameCoroutine = this.makeFrameCoroutine();
 		this.pickedA = undefined;
 		this.pickedB = undefined;
 		this.numColors = 10;
@@ -112,8 +113,7 @@ export class Board {
 		return randomElement(possibleColors)!;
 	}
 
-	*frameCoroutine(): IterableIterator<void> {
-		// TODO: Move to a member, just like in `Piece`.
+	*makeFrameCoroutine(): IterableIterator<void> {
 		const gameFlowCoroutine = this.gameFlowCoroutine();
 
 		// TODO: Abstract away.
@@ -131,7 +131,7 @@ export class Board {
 		}
 	}
 
-	private *gameFlowCoroutine() {
+	*gameFlowCoroutine() {
 		// TODO: Must add colors in pairs initially, or board is not solvable.
 		// Add initial pieces.
 		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; ++i) {

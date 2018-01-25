@@ -5,7 +5,6 @@ export class App {
 	context: CanvasRenderingContext2D;
 
 	gameMode: GameMode;
-	gameModeCoroutine: IterableIterator<void> | undefined;
 
 	lastRenderTime: number;
 
@@ -39,7 +38,6 @@ export class App {
 		})();
 
 		// Start the loop.
-		this.gameModeCoroutine = this.gameMode.frameCoroutine();
 		// TODO: Convert to generator?
 		const loop = (currentTime: number) => {
 			this.render(currentTime);
@@ -58,7 +56,7 @@ export class App {
 		// this.context.fillRect(0, 0, this.getWidth(), this.getHeight());
 
 		// Boards and avatars.
-		this.gameModeCoroutine!.next(deltaTime);
+		this.gameMode.frameCoroutine.next(deltaTime);
 		this.gameMode.draw(this.context);
 
 		// FPS counter.
