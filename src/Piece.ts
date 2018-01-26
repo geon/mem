@@ -6,15 +6,15 @@ export class Piece {
 	picked: boolean;
 	frameCoroutine: IterableIterator<void>;
 
-	button: any;
+	element: any;
 
-	constructor(options: { color: number; button: any }) {
+	constructor(options: { color: number; element: any }) {
 		this.color = options.color;
 		this.colorIsVisible = true;
 		this.picked = false;
 		this.frameCoroutine = this.makeFrameCoroutine();
 
-		this.button = options.button;
+		this.element = options.element;
 	}
 
 	setPicked(picked: boolean) {
@@ -27,7 +27,7 @@ export class Piece {
 	}
 
 	draw(_context: CanvasRenderingContext2D) {
-		this.button.textContent =
+		this.element.textContent =
 			this.picked || this.colorIsVisible ? this.color.toString() : "*";
 
 		// TODO
