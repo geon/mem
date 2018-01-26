@@ -7,8 +7,8 @@ export class Board {
 	gameMode: GameMode;
 	frameCoroutine: IterableIterator<void>;
 	pieces: Array<Piece | undefined>;
-	pickedA: Piece | undefined;
-	pickedB: Piece | undefined;
+	queuedPiece: Piece;
+	pickedPiece: Piece | undefined;
 
 	numColors: number;
 
@@ -16,10 +16,15 @@ export class Board {
 		this.gameMode = options.gameMode;
 
 		this.frameCoroutine = this.makeFrameCoroutine();
-		this.pickedA = undefined;
-		this.pickedB = undefined;
+		this.pickedPiece = undefined;
 		this.numColors = 10;
 		this.pieces = [];
+		// Assign pieces before this.
+		this.queuedPiece = new Piece({
+			color: this.randomColor(),
+			element: document.getElementById("queued-piece")!,
+		});
+		this.queuedPiece.setPicked(true);
 
 		for (let i = 0; i < Board.size.x * Board.size.y; ++i) {
 			const button = Board.getButtonForPieceIndex(i);
@@ -54,17 +59,11 @@ export class Board {
 	}
 
 	pick(index: number) {
-		const pickedPiece = this.pieces[index];
-		if (!pickedPiece) {
-			return;
-		}
+		const piece = this.pieces[index];
 
-		if (!this.pickedA) {
-			this.pickedA = pickedPiece;
-			pickedPiece.setPicked(true);
-		} else if (!this.pickedB && pickedPiece != this.pickedA) {
-			this.pickedB = pickedPiece;
-			pickedPiece.setPicked(true);
+		if (piece && !this.pickedPiece) {
+			this.pickedPiece = piece;
+			this.pickedPiece.setPicked(true);
 		}
 	}
 
@@ -124,45 +123,63 @@ export class Board {
 				.filter(piece => !!piece)
 				.map(piece => piece!.frameCoroutine);
 
-			const allCoroutines = [gameFlowCoroutine, ...pieceCoroutines];
+			const allCoroutines = [
+				gameFlowCoroutine,
+				this.queuedPiece.frameCoroutine,
+				...pieceCoroutines,
+			];
 
 			allCoroutines.forEach(coroutine => coroutine.next(deltaTime));
 		}
 	}
 
 	*gameFlowCoroutine() {
+		// Give the player a chance to see the queued piece.
+		yield* waitMs(1000);
+
 		yield* this.initializationCoroutine();
 
+		// Normal gameplay.
 		for (;;) {
-			if (this.pickedA && this.pickedB) {
+			if (this.pickedPiece) {
 				// Give the player a chance to compare the pieces visually.
 				yield* waitMs(1000);
-				if (this.pickedA.color == this.pickedB.color) {
+
+				if (this.pickedPiece.color == this.queuedPiece.color) {
 					// The player found a pair.
-					// Remove the picked pieces from the board.
+
+					// Remove the picked piece from the board.
 					this.pieces = this.pieces.map(
-						piece =>
-							piece != this.pickedA && piece != this.pickedB
-								? piece
-								: undefined,
+						piece => (piece != this.pickedPiece ? piece : undefined),
 					);
+
 					// Notify the game mode.
 					this.gameMode.onUnlockedPair(this);
 				} else {
 					// Punish player.
-					const addedPieceSuccessfully = this.addPiece(
-						this.randomColorFromExisting()!,
-					);
+					const addedPieceSuccessfully = this.addPiece(this.queuedPiece!.color);
+
 					// Detect game over.
 					if (!addedPieceSuccessfully) {
 						this.gameMode.onGameOver(this);
+
+						// TODO: Clear board animation.
+
+						break;
 					}
 				}
-				// Reset the picked pieces.
-				this.pickedA.setPicked(false);
-				this.pickedA = undefined;
-				this.pickedB.setPicked(false);
-				this.pickedB = undefined;
+
+				// TODO: Should not queue up same color twice in a row.
+				// Queue up a new piece.
+				this.queuedPiece = new Piece({
+					color: this.randomColorFromExisting()!,
+					element: document.getElementById("queued-piece")!,
+				});
+				this.queuedPiece.setPicked(true);
+
+				// Reset the picked piece.
+				this.pickedPiece.setPicked(false);
+				this.pickedPiece = undefined;
 			}
 			yield;
 		}
@@ -178,6 +195,8 @@ export class Board {
 	}
 
 	draw(context: CanvasRenderingContext2D) {
+		this.queuedPiece.draw(context);
+
 		for (let i = 0; i < Board.size.x * Board.size.y; ++i) {
 			// Erase all buttons, since they stay after pieces are destroyed.
 			const button = Board.getButtonForPieceIndex(i);
