@@ -41,7 +41,7 @@ export class Board {
 		return button as HTMLElement;
 	}
 
-	static size: Coord = new Coord({ x: 4, y: 4 });
+	static size = new Coord({ x: 4, y: 4 });
 
 	static xyToIndex(x: number, y: number) {
 		return x + y * Board.size.x;
