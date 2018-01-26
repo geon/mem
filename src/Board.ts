@@ -10,14 +10,11 @@ export class Board {
 	queuedPiece: Piece;
 	pickedPiece: Piece | undefined;
 
-	numColors: number;
-
 	constructor(options: { gameMode: GameMode }) {
 		this.gameMode = options.gameMode;
 
 		this.frameCoroutine = this.makeFrameCoroutine();
 		this.pickedPiece = undefined;
-		this.numColors = 10;
 		this.pieces = [];
 		// Assign pieces before this.
 		this.queuedPiece = new Piece({
@@ -42,6 +39,7 @@ export class Board {
 	}
 
 	static size = new Coord({ x: 4, y: 4 });
+	static numColors = 10;
 
 	static xyToIndex(x: number, y: number) {
 		return x + y * Board.size.x;
@@ -108,7 +106,7 @@ export class Board {
 	}
 
 	randomColor() {
-		const possibleColors = Array.from(range(0, this.numColors));
+		const possibleColors = Array.from(range(0, Board.numColors));
 		return randomElement(possibleColors)!;
 	}
 
