@@ -6,9 +6,9 @@ export class Piece {
 	picked: boolean;
 	frameCoroutine: IterableIterator<void>;
 
-	element: any;
+	element: HTMLElement;
 
-	constructor(options: { color: number; element: any }) {
+	constructor(options: { color: number; element: HTMLElement }) {
 		this.color = options.color;
 		this.colorIsVisible = true;
 		this.picked = false;

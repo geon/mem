@@ -33,7 +33,7 @@ export class Board {
 		const tr = table.children[0].children[coord.y];
 		const td = tr.children[coord.x];
 		const button = td.children[0];
-		return button;
+		return button as HTMLElement;
 	}
 
 	static size: Coord = new Coord({ x: 4, y: 4 });
@@ -89,10 +89,10 @@ export class Board {
 
 		for (const index of pieceAddOrder) {
 			if (!this.pieces[index]) {
-				const button = Board.getButtonForPieceIndex(index);
+				const element = Board.getButtonForPieceIndex(index);
 				this.pieces[index] = new Piece({
 					color,
-					button,
+					element,
 				});
 				return true;
 			}
