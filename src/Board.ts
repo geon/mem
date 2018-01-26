@@ -16,7 +16,6 @@ export class Board {
 		this.frameCoroutine = this.makeFrameCoroutine();
 		this.pickedPiece = undefined;
 		this.pieces = [];
-		// Assign pieces before this.
 		this.queuedPiece = new Piece({
 			color: this.randomColor(),
 			element: document.getElementById("queued-piece")!,
