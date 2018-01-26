@@ -20,6 +20,11 @@ export class GameMode1p implements GameMode {
 		// TODO
 	}
 
+	onWin(_board: Board) {
+		console.log("win");
+		// TODO
+	}
+
 	*makeFrameCoroutine(): IterableIterator<void> {
 		for (;;) {
 			// The player board.

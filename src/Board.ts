@@ -155,6 +155,10 @@ export class Board {
 
 					// Notify the game mode.
 					this.gameMode.onUnlockedPair(this);
+
+					if (this.pieces.filter(piece => !!piece).length < 2) {
+						this.gameMode.onWin(this);
+					}
 				} else {
 					// Punish player.
 					const addedPieceSuccessfully = this.addPiece(this.queuedPiece!.color);
