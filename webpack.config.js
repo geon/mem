@@ -15,6 +15,7 @@ module.exports = {
       { test: /\.ts?$/, loader: "ts-loader" }
     ]
   },
+  devtool: "inline-source-map",
   devServer: {
 	contentBase: path.join(__dirname, 'src'),
     stats: {
