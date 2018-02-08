@@ -30,5 +30,8 @@
 	"prettier": {
 		"useTabs": true,
 		"trailingComma": "all"
+	},
+	"dependencies": {
+		"twgl.js": "^4.4.0"
 	}
 }
