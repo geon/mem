@@ -38,8 +38,8 @@ export class GameMode1p implements GameMode {
 		}
 	}
 
-	draw(context: CanvasRenderingContext2D) {
+	draw() {
 		// The player board.
-		this.board.draw(context);
+		this.board.draw();
 	}
 }

@@ -2,6 +2,7 @@ import { Coord } from "./Coord";
 import { GameMode } from "./GameMode";
 import { Piece } from "./Piece";
 import { waitMs, range, randomElement } from "./functions";
+import * as Renderer from "./Renderer";
 
 export class Board {
 	gameMode: GameMode;
@@ -18,23 +19,13 @@ export class Board {
 		this.pieces = [];
 		this.queuedPiece = new Piece({
 			color: this.randomColor(),
-			element: document.getElementById("queued-piece")!,
 		});
 		this.queuedPiece.setPicked(true);
 
-		for (let i = 0; i < Board.size.x * Board.size.y; ++i) {
-			const button = Board.getButtonForPieceIndex(i);
-			button.addEventListener("click", () => this.pick(i));
-		}
-	}
-
-	static getButtonForPieceIndex(index: number) {
-		const coord = Board.indexToCoord(index);
-		const table = document.getElementsByTagName("table")[0];
-		const tr = table.children[0].children[coord.y];
-		const td = tr.children[coord.x];
-		const button = td.children[0];
-		return button as HTMLElement;
+		// TODO: Input.
+		// for (let i = 0; i < Board.size.x * Board.size.y; ++i) {
+		// 	button.addEventListener("click", () => this.pick(i));
+		// }
 	}
 
 	static size = new Coord({ x: 4, y: 4 });
@@ -85,10 +76,8 @@ export class Board {
 
 		for (const index of pieceAddOrder) {
 			if (!this.pieces[index]) {
-				const element = Board.getButtonForPieceIndex(index);
 				this.pieces[index] = new Piece({
 					color,
-					element,
 				});
 				return true;
 			}
@@ -174,7 +163,6 @@ export class Board {
 				// Queue up a new piece.
 				this.queuedPiece = new Piece({
 					color: this.randomColorFromExisting()!,
-					element: document.getElementById("queued-piece")!,
 				});
 				this.queuedPiece.setPicked(true);
 
@@ -195,17 +183,15 @@ export class Board {
 		}
 	}
 
-	draw(context: CanvasRenderingContext2D) {
-		this.queuedPiece.draw(context);
+	draw() {
+		Renderer.clear();
+
+		this.queuedPiece.draw();
 
 		for (let i = 0; i < Board.size.x * Board.size.y; ++i) {
-			// Erase all buttons, since they stay after pieces are destroyed.
-			const button = Board.getButtonForPieceIndex(i);
-			button.textContent = "";
-
 			const piece = this.pieces[i];
 			if (piece) {
-				piece.draw(context);
+				piece.draw();
 			}
 		}
 	}

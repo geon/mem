@@ -1,18 +1,14 @@
+import * as Renderer from "./Renderer";
 import { GameMode } from "./GameMode";
 import { GameMode1p } from "./GameMode1p";
 
 export class App {
-	context: CanvasRenderingContext2D;
-
 	gameMode: GameMode;
 
 	lastRenderTime: number;
 
-	constructor(options: { context: CanvasRenderingContext2D }) {
-		this.context = options.context;
-
+	constructor() {
 		this.gameMode = new GameMode1p();
-
 		this.lastRenderTime = 0;
 	}
 
@@ -22,6 +18,9 @@ export class App {
 	}
 
 	startRenderLoop() {
+
+		Renderer.init();
+
 		const requestAnimFrame: (
 			callback: (currentTime: number) => void,
 		) => void = (() => {
@@ -57,7 +56,7 @@ export class App {
 
 		// Boards and avatars.
 		this.gameMode.frameCoroutine.next(deltaTime);
-		this.gameMode.draw(this.context);
+		this.gameMode.draw();
 
 		// FPS counter.
 		// this.context.fillStyle = "black";

@@ -7,5 +7,5 @@ export interface GameMode {
 	onGameOver: (board: Board) => void;
 	onWin: (board: Board) => void;
 	makeFrameCoroutine: () => IterableIterator<void>;
-	draw: (context: CanvasRenderingContext2D) => void;
+	draw: () => void;
 }

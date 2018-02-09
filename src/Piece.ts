@@ -1,4 +1,5 @@
 import { waitMs } from "./functions";
+import * as Renderer from "./Renderer";
 
 export class Piece {
 	color: number;
@@ -6,15 +7,13 @@ export class Piece {
 	picked: boolean;
 	frameCoroutine: IterableIterator<void>;
 
-	element: HTMLElement;
-
-	constructor(options: { color: number; element: HTMLElement }) {
+	constructor(options: {
+		color: number;
+	}) {
 		this.color = options.color;
 		this.colorIsVisible = true;
 		this.picked = false;
 		this.frameCoroutine = this.makeFrameCoroutine();
-
-		this.element = options.element;
 	}
 
 	setPicked(picked: boolean) {
@@ -26,10 +25,9 @@ export class Piece {
 		this.colorIsVisible = false;
 	}
 
-	draw(_context: CanvasRenderingContext2D) {
-		this.element.textContent =
-			this.picked || this.colorIsVisible ? this.color.toString() : "*";
-
-		// TODO
+	draw() {
+		if (this.picked || this.colorIsVisible) {
+			Renderer.draw();
+		}
 	}
 }
