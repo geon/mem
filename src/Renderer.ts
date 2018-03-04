@@ -1,3 +1,4 @@
+import { Coord } from "./Coord";
 import * as twgl from "twgl.js";
 
 export const gl = (document.getElementsByTagName(
@@ -13,6 +14,7 @@ export function init() {
 			uniform mat4 u_world;
 			uniform mat4 u_viewInverse;
 			uniform mat4 u_worldInverseTranspose;
+			uniform vec4 u_position;
 
 			attribute vec4 position;
 			attribute vec3 normal;
@@ -23,7 +25,7 @@ export function init() {
 			varying vec3 v_surfaceToView;
 
 			void main() {
-				v_position = u_worldViewProjection * position;
+				v_position = u_worldViewProjection * (position + u_position);
 				v_normal = (u_worldInverseTranspose * vec4(normal, 0)).xyz;
 				v_surfaceToLight = u_lightWorldPos - (u_world * position).xyz;
 				v_surfaceToView = (u_viewInverse[3] - (u_world * position)).xyz;
@@ -43,6 +45,7 @@ export function init() {
 			uniform vec4 u_specular;
 			uniform float u_shininess;
 			uniform float u_specularFactor;
+			uniform vec4 u_diffuseColor;
 
 			vec4 lit(float l ,float h, float m) {
 				return vec4(
@@ -54,7 +57,7 @@ export function init() {
 			}
 
 			void main() {
-				vec4 diffuseColor = [1, 1, 1, 1];
+				vec4 diffuseColor = u_diffuseColor;
 				vec3 a_normal = normalize(v_normal);
 				vec3 surfaceToLight = normalize(v_surfaceToLight);
 				vec3 surfaceToView = normalize(v_surfaceToView);
@@ -275,7 +278,7 @@ export function clear() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
 
-export function draw() {
+export function draw(color: number, position: Coord) {
 	const programInfo =
 		program! && twgl.createProgramInfoFromProgram(gl, program!);
 
@@ -305,6 +308,19 @@ export function draw() {
 		u_specular: [1, 1, 1, 1],
 		u_shininess: 50,
 		u_specularFactor: 1,
+		u_diffuseColor: [
+			[0.6, 0.8, 0.6, 1],
+			[0.5, 0.7, 0.7, 1],
+			[0.4, 0.6, 0.8, 1],
+			[0.3, 0.5, 0.7, 1],
+			[0.4, 0.4, 0.6, 1],
+			[0.5, 0.3, 0.5, 1],
+			[0.6, 0.4, 0.4, 1],
+			[0.7, 0.5, 0.3, 1],
+			[0.8, 0.6, 0.4, 1],
+			[0.7, 0.7, 0.5, 1],
+		][color],
+		u_position: [position.x, position.y, 0, 0],
 	};
 
 	uniforms.u_viewInverse = camera;
