@@ -4,8 +4,9 @@ export const gl = (document.getElementsByTagName(
 	"canvas",
 )[0] as HTMLCanvasElement).getContext("webgl") as WebGLRenderingContext;
 
+let program: WebGLProgram | undefined;
 export function init() {
-	const program = twgl.createProgramFromSources(gl, [
+	program = twgl.createProgramFromSources(gl, [
 		`
 			uniform mat4 u_worldViewProjection;
 			uniform vec3 u_lightWorldPos;
@@ -74,41 +75,6 @@ export function init() {
 			}
 		`,
 	]);
-	const programInfo = program && twgl.createProgramInfoFromProgram(gl, program);
-
-	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-	gl.useProgram(programInfo.program);
-
-	const fov = 30 * Math.PI / 180;
-	const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-	const zNear = 0.5;
-	const zFar = 10;
-	const projection = twgl.m4.perspective(fov, aspect, zNear, zFar);
-	const eye = [1, 4, -6];
-	const target = [0, 0, 0];
-	const up = [0, 1, 0];
-
-	const camera = twgl.m4.lookAt(eye, target, up);
-	const view = twgl.m4.inverse(camera);
-	const viewProjection = twgl.m4.multiply(projection, view);
-	const world = twgl.m4.rotationY(0);
-
-	const uniforms: any = {
-		u_lightWorldPos: [1, 8, -10],
-		u_lightColor: [1, 0.8, 0.8, 1],
-		u_ambient: [0, 0, 0, 1],
-		u_specular: [1, 1, 1, 1],
-		u_shininess: 50,
-		u_specularFactor: 1,
-	};
-
-	uniforms.u_viewInverse = camera;
-	uniforms.u_world = world;
-	uniforms.u_worldInverseTranspose = twgl.m4.transpose(twgl.m4.inverse(world));
-	uniforms.u_worldViewProjection = twgl.m4.multiply(viewProjection, world);
-
-	twgl.setUniforms(programInfo, uniforms);
-	twgl.setBuffersAndAttributes(gl, programInfo, bufferInfo);
 
 	gl.enable(gl.DEPTH_TEST);
 	gl.enable(gl.CULL_FACE);
@@ -310,5 +276,43 @@ export function clear() {
 }
 
 export function draw() {
+	const programInfo =
+		program! && twgl.createProgramInfoFromProgram(gl, program!);
+
+	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+	gl.useProgram(programInfo.program);
+
+	twgl.setBuffersAndAttributes(gl, programInfo, bufferInfo);
+
+	const fov = 30 * Math.PI / 180;
+	const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+	const zNear = 0.5;
+	const zFar = 10;
+	const projection = twgl.m4.perspective(fov, aspect, zNear, zFar);
+	const eye = [1, 4, -6];
+	const target = [0, 0, 0];
+	const up = [0, 1, 0];
+
+	const camera = twgl.m4.lookAt(eye, target, up);
+	const view = twgl.m4.inverse(camera);
+	const viewProjection = twgl.m4.multiply(projection, view);
+	const world = twgl.m4.rotationY(0);
+
+	const uniforms: any = {
+		u_lightWorldPos: [1, 8, -10],
+		u_lightColor: [1, 0.8, 0.8, 1],
+		u_ambient: [0, 0, 0, 1],
+		u_specular: [1, 1, 1, 1],
+		u_shininess: 50,
+		u_specularFactor: 1,
+	};
+
+	uniforms.u_viewInverse = camera;
+	uniforms.u_world = world;
+	uniforms.u_worldInverseTranspose = twgl.m4.transpose(twgl.m4.inverse(world));
+	uniforms.u_worldViewProjection = twgl.m4.multiply(viewProjection, world);
+
+	twgl.setUniforms(programInfo, uniforms);
+
 	twgl.drawBufferInfo(gl, bufferInfo);
 }
