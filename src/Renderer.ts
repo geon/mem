@@ -15,16 +15,13 @@ export function init() {
 
 			attribute vec4 position;
 			attribute vec3 normal;
-			attribute vec2 texcoord;
 
 			varying vec4 v_position;
-			varying vec2 v_texCoord;
 			varying vec3 v_normal;
 			varying vec3 v_surfaceToLight;
 			varying vec3 v_surfaceToView;
 
 			void main() {
-				v_texCoord = texcoord;
 				v_position = u_worldViewProjection * position;
 				v_normal = (u_worldInverseTranspose * vec4(normal, 0)).xyz;
 				v_surfaceToLight = u_lightWorldPos - (u_world * position).xyz;
@@ -36,14 +33,12 @@ export function init() {
 			precision mediump float;
 
 			varying vec4 v_position;
-			varying vec2 v_texCoord;
 			varying vec3 v_normal;
 			varying vec3 v_surfaceToLight;
 			varying vec3 v_surfaceToView;
 
 			uniform vec4 u_lightColor;
 			uniform vec4 u_ambient;
-			uniform sampler2D u_diffuse;
 			uniform vec4 u_specular;
 			uniform float u_shininess;
 			uniform float u_specularFactor;
@@ -58,7 +53,7 @@ export function init() {
 			}
 
 			void main() {
-				vec4 diffuseColor = texture2D(u_diffuse, v_texCoord);
+				vec4 diffuseColor = [1, 1, 1, 1];
 				vec3 a_normal = normalize(v_normal);
 				vec3 surfaceToLight = normalize(v_surfaceToLight);
 				vec3 surfaceToView = normalize(v_surfaceToView);
@@ -84,17 +79,6 @@ export function init() {
 	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 	gl.useProgram(programInfo.program);
 
-	const tex = twgl.createTexture(gl, {
-		min: gl.NEAREST,
-		mag: gl.NEAREST,
-		src: [
-			...[255, 255, 255, 255],
-			...[192, 192, 192, 255],
-			...[192, 192, 192, 255],
-			...[255, 255, 255, 255],
-		],
-	});
-
 	const fov = 30 * Math.PI / 180;
 	const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 	const zNear = 0.5;
@@ -116,7 +100,6 @@ export function init() {
 		u_specular: [1, 1, 1, 1],
 		u_shininess: 50,
 		u_specularFactor: 1,
-		u_diffuse: tex,
 	};
 
 	uniforms.u_viewInverse = camera;
@@ -281,56 +264,6 @@ const bufferInfo = twgl.createBufferInfoFromArrays(gl, {
 		0,
 		0,
 		-1,
-	],
-	texcoord: [
-		1,
-		0,
-		0,
-		0,
-		0,
-		1,
-		1,
-		1,
-		1,
-		0,
-		0,
-		0,
-		0,
-		1,
-		1,
-		1,
-		1,
-		0,
-		0,
-		0,
-		0,
-		1,
-		1,
-		1,
-		1,
-		0,
-		0,
-		0,
-		0,
-		1,
-		1,
-		1,
-		1,
-		0,
-		0,
-		0,
-		0,
-		1,
-		1,
-		1,
-		1,
-		0,
-		0,
-		0,
-		0,
-		1,
-		1,
-		1,
 	],
 	indices: [
 		0,
