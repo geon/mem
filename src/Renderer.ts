@@ -1,4 +1,4 @@
-import { Coord } from "./Coord";
+import { Coord2 } from "./Coord2";
 import * as twgl from "twgl.js";
 
 export const gl = (document.getElementsByTagName(
@@ -278,7 +278,7 @@ export function clear() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
 
-export function draw(color: number, position: Coord) {
+export function draw(color: number, position: Coord2) {
 	const programInfo =
 		program! && twgl.createProgramInfoFromProgram(gl, program!);
 

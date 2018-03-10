@@ -1,4 +1,4 @@
-export class Coord {
+export class Coord2 {
 	x: number;
 	y: number;
 
@@ -8,7 +8,7 @@ export class Coord {
 	}
 
 	scaled(factor: number) {
-		return Coord.scale(this, factor);
+		return Coord2.scale(this, factor);
 	}
 
 	length() {
@@ -16,29 +16,29 @@ export class Coord {
 	}
 
 	normalized() {
-		return Coord.scale(this, 1 / this.length());
+		return Coord2.scale(this, 1 / this.length());
 	}
 
-	static distance(a: Coord, b: Coord) {
-		return Coord.subtract(a, b).length();
+	static distance(a: Coord2, b: Coord2) {
+		return Coord2.subtract(a, b).length();
 	}
 
-	static add(a: Coord, b: Coord) {
-		return new Coord({
+	static add(a: Coord2, b: Coord2) {
+		return new Coord2({
 			x: a.x + b.x,
 			y: a.y + b.y,
 		});
 	}
 
-	static subtract(a: Coord, b: Coord) {
-		return new Coord({
+	static subtract(a: Coord2, b: Coord2) {
+		return new Coord2({
 			x: a.x - b.x,
 			y: a.y - b.y,
 		});
 	}
 
-	static scale(coord: Coord, factor: number) {
-		return new Coord({
+	static scale(coord: Coord2, factor: number) {
+		return new Coord2({
 			x: coord.x * factor,
 			y: coord.y * factor,
 		});

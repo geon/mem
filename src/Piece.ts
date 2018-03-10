@@ -1,4 +1,4 @@
-import { Coord } from "./Coord";
+import { Coord2 } from "./Coord2";
 import { waitMs } from "./functions";
 import * as Renderer from "./Renderer";
 
@@ -24,7 +24,7 @@ export class Piece {
 		this.colorIsVisible = false;
 	}
 
-	draw(position: Coord) {
+	draw(position: Coord2) {
 		if (this.picked || this.colorIsVisible) {
 			Renderer.draw(this.color, position);
 		}

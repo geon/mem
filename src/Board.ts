@@ -1,4 +1,4 @@
-import { Coord } from "./Coord";
+import { Coord2 } from "./Coord2";
 import { GameMode } from "./GameMode";
 import { Piece } from "./Piece";
 import { waitMs, range, randomElement } from "./functions";
@@ -28,19 +28,19 @@ export class Board {
 		// }
 	}
 
-	static size = new Coord({ x: 4, y: 4 });
+	static size = new Coord2({ x: 4, y: 4 });
 	static numColors = 10;
 
 	static xyToIndex(x: number, y: number) {
 		return x + y * Board.size.x;
 	}
 
-	static coordToIndex(coord: Coord) {
+	static coordToIndex(coord: Coord2) {
 		return Board.xyToIndex(coord.x, coord.y);
 	}
 
 	static indexToCoord(index: number) {
-		return new Coord({
+		return new Coord2({
 			x: index % Board.size.x,
 			y: Math.floor(index / Board.size.x),
 		});
@@ -60,7 +60,7 @@ export class Board {
 			range(0, Board.size.x * Board.size.y),
 		).sort((a, b) => {
 			// Meassure from center.
-			const center = new Coord({
+			const center = new Coord2({
 				x: (Board.size.x - 1) / 2,
 				y: (Board.size.y - 1) / 2,
 			});
@@ -69,8 +69,8 @@ export class Board {
 			center.x += 0.2;
 
 			// Order by distance.
-			const A = Coord.distance(Board.indexToCoord(a), center);
-			const B = Coord.distance(Board.indexToCoord(b), center);
+			const A = Coord2.distance(Board.indexToCoord(a), center);
+			const B = Coord2.distance(Board.indexToCoord(b), center);
 			return A - B;
 		});
 
@@ -186,12 +186,12 @@ export class Board {
 	draw() {
 		Renderer.clear();
 
-		this.queuedPiece.draw(new Coord({ x: 0, y: 0 }));
+		this.queuedPiece.draw(new Coord2({ x: 0, y: 0 }));
 
 		for (let i = 0; i < Board.size.x * Board.size.y; ++i) {
 			const piece = this.pieces[i];
 			if (piece) {
-				piece.draw(Coord.scale(Board.indexToCoord(i), 0.3));
+				piece.draw(Coord2.scale(Board.indexToCoord(i), 0.3));
 			}
 		}
 	}
