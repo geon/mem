@@ -107,7 +107,7 @@ export function draw(color: number, position: Coord2) {
 	const zNear = 0.5;
 	const zFar = 10;
 	const projection = twgl.m4.perspective(fov, aspect, zNear, zFar);
-	const eye = [1, 4, -6];
+	const eye = [1, 4, 6];
 	const target = [0, 0, 0];
 	const up = [0, 1, 0];
 
@@ -117,7 +117,7 @@ export function draw(color: number, position: Coord2) {
 	const world = twgl.m4.rotationY(0);
 
 	const uniforms: any = {
-		u_lightWorldPos: [1, 8, -10],
+		u_lightWorldPos: [-4, 8, 10],
 		u_lightColor: [1, 0.8, 0.8, 1],
 		u_ambient: [0, 0, 0, 1],
 		u_specular: [1, 1, 1, 1],
