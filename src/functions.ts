@@ -1,4 +1,5 @@
 // import { Coord2 } from "./Coord2";
+import * as twgl from "twgl.js";
 import { Coord3 } from "./Coord3";
 
 export function* waitMs(duration: number): IterableIterator<void> {
@@ -168,29 +169,38 @@ export function makeTesselatedSphereMesh(tesselation: number): Mesh {
 function coord3ToTwglVec3(coord: Coord3): Array<number> {
 	return [coord.x, coord.y, coord.z];
 }
-export function meshToWebglArrays(mesh: Mesh): { [key: string]: number[] } {
+export function meshToWebglArrays(mesh: Mesh): twgl.Arrays {
 	return {
-		position: mesh.vertices
-			.map(vertex => vertex.position)
-			.map(coord3ToTwglVec3)
-			.reduce((soFar, current) => {
-				soFar.push(...current);
-				return soFar;
-			}, []),
-		normal: mesh.vertices
-			.map(vertex => vertex.normal)
-			.map(coord3ToTwglVec3)
-			.reduce((soFar, current) => {
-				soFar.push(...current);
-				return soFar;
-			}, []),
-		texCoord: mesh.vertices
-			.map(vertex => vertex.texCoord)
-			.map(coord3ToTwglVec3)
-			.reduce((soFar, current) => {
-				soFar.push(...current);
-				return soFar;
-			}, []),
-		indices: mesh.indices as Array<number>,
+		position: {
+			numComponents: 3,
+			data: mesh.vertices
+				.map(vertex => vertex.position)
+				.map(coord3ToTwglVec3)
+				.reduce((soFar, current) => {
+					soFar.push(...current);
+					return soFar;
+				}, []),
+		},
+		normal: {
+			numComponents: 3,
+			data: mesh.vertices
+				.map(vertex => vertex.normal)
+				.map(coord3ToTwglVec3)
+				.reduce((soFar, current) => {
+					soFar.push(...current);
+					return soFar;
+				}, []),
+		},
+		texCoord: {
+			numComponents: 3,
+			data: mesh.vertices
+				.map(vertex => vertex.texCoord)
+				.map(coord3ToTwglVec3)
+				.reduce((soFar, current) => {
+					soFar.push(...current);
+					return soFar;
+				}, []),
+		},
+		indices: { numComponents: 3, data: mesh.indices as Array<number> },
 	};
 }

@@ -33,7 +33,7 @@ declare module 'twgl.js' {
     export function setUniforms(setters: ProgramInfo | { [key: string]: (...params: any[]) => void }, values: { [key: string]: any }): void;
 
     export interface Arrays {
-        [key: string]: number[] | ArrayBuffer
+        [key: string]: number[] | ArrayBuffer | FullArraySpec
     }
 
     export type ArraySpec = number[] | ArrayBuffer | FullArraySpec;
@@ -104,7 +104,7 @@ declare module 'twgl.js' {
     export interface FullArraySpec {
         data: number | number[] | ArrayBuffer;
         numComponents?: number;
-        type: new (...args: any[]) => ArrayBuffer;
+        type?: new (...args: any[]) => ArrayBuffer;
         size?: number;
         normalize?: boolean;
         stride?: number;
