@@ -40,7 +40,7 @@ export function fisherYatesArrayShuffle<T>(myArray: Array<T>) {
 interface Vertex {
 	position: Coord3;
 	normal: Coord3;
-	// texcoord: Coord2;
+	texCoord: Coord3;
 }
 interface Mesh {
 	vertices: ReadonlyArray<Vertex>;
@@ -61,16 +61,18 @@ export function makeTesselatedCubeMesh(tesselation: number): Mesh {
 			for (let u = 0; u <= tesselation; ++u) {
 				const uFactor = u / tesselation;
 
-				vertices.push({
-					position: Coord3.add(
-						Coord3.add(
-							uAxis.scaled(-1 + 2 * uFactor),
-							vAxis.scaled(-1 + 2 * vFactor),
-						),
-						normal,
+				const position = Coord3.add(
+					Coord3.add(
+						uAxis.scaled(-1 + 2 * uFactor),
+						vAxis.scaled(-1 + 2 * vFactor),
 					),
-					normal: normal,
-					// texcoord: new Coord2({ x: -1, y: -1 }),
+					normal,
+				);
+
+				vertices.push({
+					position,
+					normal,
+					texCoord: position.normalized(),
 				});
 			}
 		}
@@ -153,7 +155,7 @@ export function makeTesselatedSphereMesh(tesselation: number): Mesh {
 		return {
 			position: normalizedPosition,
 			normal: normalizedPosition,
-			// texcoord: vertex.texcoord,
+			texCoord: vertex.texCoord,
 		};
 	});
 
@@ -182,13 +184,13 @@ export function meshToWebglArrays(mesh: Mesh): { [key: string]: number[] } {
 				soFar.push(...current);
 				return soFar;
 			}, []),
-		// texcoords: mesh.vertices
-		// 	.map(vertex => vertex.texcoord)
-		// 	.map(coord2ToTwglVec2)
-		// 	.reduce((soFar, current) => {
-		// 		soFar.push(...current);
-		// 		return soFar;
-		// 	}, []),
+		texCoord: mesh.vertices
+			.map(vertex => vertex.texCoord)
+			.map(coord3ToTwglVec3)
+			.reduce((soFar, current) => {
+				soFar.push(...current);
+				return soFar;
+			}, []),
 		indices: mesh.indices as Array<number>,
 	};
 }

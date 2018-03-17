@@ -7,6 +7,10 @@ export const gl = (document.getElementsByTagName(
 )[0] as HTMLCanvasElement).getContext("webgl") as WebGLRenderingContext;
 
 let program: WebGLProgram | undefined;
+let textures: {
+	[key: string]: WebGLTexture;
+};
+
 export function init() {
 	program = twgl.createProgramFromSources(gl, [
 		`
@@ -19,15 +23,18 @@ export function init() {
 
 			attribute vec4 position;
 			attribute vec3 normal;
+			attribute vec3 texCoord;
 
 			varying vec4 v_position;
 			varying vec3 v_normal;
+			varying vec3 v_texCoord;
 			varying vec3 v_surfaceToLight;
 			varying vec3 v_surfaceToView;
 
 			void main() {
 				v_position = u_worldViewProjection * (position + u_position);
 				v_normal = (u_worldInverseTranspose * vec4(normal, 0)).xyz;
+				v_texCoord = texCoord;
 				v_surfaceToLight = u_lightWorldPos - (u_world * position).xyz;
 				v_surfaceToView = (u_viewInverse[3] - (u_world * position)).xyz;
 				gl_Position = v_position;
@@ -38,6 +45,7 @@ export function init() {
 
 			varying vec4 v_position;
 			varying vec3 v_normal;
+			varying vec3 v_texCoord;
 			varying vec3 v_surfaceToLight;
 			varying vec3 v_surfaceToView;
 
@@ -46,7 +54,7 @@ export function init() {
 			uniform vec4 u_specular;
 			uniform float u_shininess;
 			uniform float u_specularFactor;
-			uniform vec4 u_diffuseColor;
+			uniform samplerCube u_diffuseMap;
 
 			vec4 lit(float l ,float h, float m) {
 				return vec4(
@@ -58,7 +66,7 @@ export function init() {
 			}
 
 			void main() {
-				vec4 diffuseColor = u_diffuseColor;
+				vec4 diffuseColor = textureCube(u_diffuseMap, normalize(v_texCoord));
 				vec3 a_normal = normalize(v_normal);
 				vec3 surfaceToLight = normalize(v_surfaceToLight);
 				vec3 surfaceToView = normalize(v_surfaceToView);
@@ -83,6 +91,13 @@ export function init() {
 	gl.enable(gl.DEPTH_TEST);
 	gl.enable(gl.CULL_FACE);
 
+	textures = twgl.createTextures(gl, {
+		sharks: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/sharks.png",
+		},
+	});
+
 	clear();
 }
 
@@ -93,7 +108,7 @@ export function clear() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
 
-export function draw(color: number, position: Coord2) {
+export function draw(_color: number, position: Coord2) {
 	const programInfo =
 		program! && twgl.createProgramInfoFromProgram(gl, program!);
 
@@ -123,18 +138,7 @@ export function draw(color: number, position: Coord2) {
 		u_specular: [1, 1, 1, 1],
 		u_shininess: 50,
 		u_specularFactor: 1,
-		u_diffuseColor: [
-			[0.6, 0.8, 0.6, 1],
-			[0.5, 0.7, 0.7, 1],
-			[0.4, 0.6, 0.8, 1],
-			[0.3, 0.5, 0.7, 1],
-			[0.4, 0.4, 0.6, 1],
-			[0.5, 0.3, 0.5, 1],
-			[0.6, 0.4, 0.4, 1],
-			[0.7, 0.5, 0.3, 1],
-			[0.8, 0.6, 0.4, 1],
-			[0.7, 0.7, 0.5, 1],
-		][color],
+		u_diffuseMap: textures.sharks, //[color],
 		u_position: [position.x, position.y, 0, 0],
 	};
 
