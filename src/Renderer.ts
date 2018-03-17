@@ -2,9 +2,8 @@ import { Coord2 } from "./Coord2";
 import * as twgl from "twgl.js";
 import { meshToWebglArrays, makeTesselatedSphereMesh } from "./functions";
 
-export const gl = (document.getElementsByTagName(
-	"canvas",
-)[0] as HTMLCanvasElement).getContext("webgl") as WebGLRenderingContext;
+const canvas = document.getElementsByTagName("canvas")[0] as HTMLCanvasElement;
+export const gl = canvas.getContext("webgl") as WebGLRenderingContext;
 
 let program: WebGLProgram | undefined;
 let textures: {
@@ -12,6 +11,8 @@ let textures: {
 };
 
 export function init() {
+	twgl.resizeCanvasToDisplaySize(canvas, window.devicePixelRatio);
+
 	program = twgl.createProgramFromSources(gl, [
 		`
 			uniform mat4 u_worldViewProjection;
