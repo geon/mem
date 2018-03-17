@@ -148,13 +148,16 @@ function mergeMeshes(meshes: ReadonlyArray<Mesh>): Mesh {
 	);
 }
 
-export function makeTesselatedSphereMesh(tesselation: number): Mesh {
+export function makeTesselatedSphereMesh(
+	radius: number,
+	tesselation: number,
+): Mesh {
 	const mesh = makeTesselatedCubeMesh(tesselation) as MutableMesh;
 
 	mesh.vertices = mesh.vertices.map(vertex => {
 		const normalizedPosition = vertex.position.normalized();
 		return {
-			position: normalizedPosition,
+			position: normalizedPosition.scaled(radius),
 			normal: normalizedPosition,
 			texCoord: vertex.texCoord,
 		};

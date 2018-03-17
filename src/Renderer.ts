@@ -102,7 +102,7 @@ export function init() {
 	clear();
 }
 
-const ballArrays = meshToWebglArrays(makeTesselatedSphereMesh(8));
+const ballArrays = meshToWebglArrays(makeTesselatedSphereMesh(0.4, 8));
 const bufferInfo = twgl.createBufferInfoFromArrays(gl, ballArrays);
 
 export function clear() {
@@ -121,9 +121,9 @@ export function draw(_color: number, position: Coord2) {
 	const fov = 30 * Math.PI / 180;
 	const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 	const zNear = 0.5;
-	const zFar = 10;
+	const zFar = 30;
 	const projection = twgl.m4.perspective(fov, aspect, zNear, zFar);
-	const eye = [1, 4, 6];
+	const eye = [1, 4, 12];
 	const target = [0, 0, 0];
 	const up = [0, 1, 0];
 

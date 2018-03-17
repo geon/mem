@@ -186,12 +186,19 @@ export class Board {
 	draw() {
 		Renderer.clear();
 
-		this.queuedPiece.draw(new Coord2({ x: 0, y: 0 }));
+		this.queuedPiece.draw(
+			Coord2.add(Board.size.scaled(0.5), new Coord2({ x: 0.5, y: 0.5 })),
+		);
 
 		for (let i = 0; i < Board.size.x * Board.size.y; ++i) {
 			const piece = this.pieces[i];
 			if (piece) {
-				piece.draw(Coord2.scale(Board.indexToCoord(i), 0.3));
+				piece.draw(
+					Coord2.add(
+						Coord2.add(Board.indexToCoord(i), Board.size.scaled(-0.5)),
+						new Coord2({ x: 0.5, y: 0.5 }),
+					),
+				);
 			}
 		}
 	}
