@@ -137,7 +137,7 @@ export function draw(_color: number, position: Coord2) {
 	const uniforms: any = {
 		u_lightWorldPos: [-4, 8, 10],
 		u_lightColor: [1, 0.8, 0.8, 1],
-		u_ambient: [0.2, 0.2, 0.2, 1],
+		u_ambient: [0.5, 0.5, 0.5, 1],
 		u_specular: [0.5, 0.5, 0.5, 1],
 		u_shininess: 50,
 		u_specularFactor: 1,
