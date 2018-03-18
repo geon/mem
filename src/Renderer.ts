@@ -18,6 +18,7 @@ export function init() {
 			uniform mat4 u_worldViewProjection;
 			uniform vec3 u_lightWorldPos;
 			uniform mat4 u_world;
+			uniform mat4 u_model;
 			uniform mat4 u_viewInverse;
 			uniform mat4 u_worldInverseTranspose;
 			uniform vec4 u_position;
@@ -33,7 +34,7 @@ export function init() {
 			varying vec3 v_surfaceToView;
 
 			void main() {
-				v_position = u_worldViewProjection * (position + u_position);
+				v_position = u_worldViewProjection * ((u_model * position) + u_position);
 				v_normal = (u_worldInverseTranspose * vec4(normal, 0)).xyz;
 				v_texCoord = texCoord;
 				v_surfaceToLight = u_lightWorldPos - (u_world * position).xyz;
@@ -131,6 +132,7 @@ export function draw(_color: number, position: Coord2) {
 	const view = twgl.m4.inverse(camera);
 	const viewProjection = twgl.m4.multiply(projection, view);
 	const world = twgl.m4.rotationY(0);
+	const model = twgl.m4.rotationY(new Date().getTime() / 1000);
 
 	const uniforms: any = {
 		u_lightWorldPos: [-4, 8, 10],
@@ -145,6 +147,7 @@ export function draw(_color: number, position: Coord2) {
 
 	uniforms.u_viewInverse = camera;
 	uniforms.u_world = world;
+	uniforms.u_model = model;
 	uniforms.u_worldInverseTranspose = twgl.m4.transpose(twgl.m4.inverse(world));
 	uniforms.u_worldViewProjection = twgl.m4.multiply(viewProjection, world);
 
