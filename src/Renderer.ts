@@ -168,7 +168,10 @@ export function draw(color: number, position: Coord2) {
 	const view = twgl.m4.inverse(camera);
 	const viewProjection = twgl.m4.multiply(projection, view);
 	const world = twgl.m4.rotationY(0);
-	const model = twgl.m4.rotationY(new Date().getTime() / 1000);
+	const model = twgl.m4.multiply(
+		twgl.m4.rotationY(new Date().getTime() / 1000),
+		twgl.m4.rotationX(new Date().getTime() / 1341),
+	);
 
 	const uniforms: any = {
 		u_lightWorldPos: [-4, 8, 10],
