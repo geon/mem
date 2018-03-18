@@ -35,7 +35,7 @@ export function init() {
 
 			void main() {
 				v_position = u_worldViewProjection * ((u_model * position) + u_position);
-				v_normal = (u_worldInverseTranspose * vec4(normal, 0)).xyz;
+				v_normal = (u_worldInverseTranspose * u_model * vec4(normal, 0)).xyz;
 				v_texCoord = texCoord;
 				v_surfaceToLight = u_lightWorldPos - (u_world * position).xyz;
 				v_surfaceToView = (u_viewInverse[3] - (u_world * position)).xyz;
