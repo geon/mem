@@ -94,9 +94,45 @@ export function init() {
 	gl.enable(gl.CULL_FACE);
 
 	textures = twgl.createTextures(gl, {
-		sharks: {
+		earth: {
 			target: gl.TEXTURE_CUBE_MAP,
-			src: "graphics/sharks.png",
+			src: "graphics/earth.jpg",
+		},
+		globe: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/globe.jpg",
+		},
+		eye: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/eye.jpg",
+		},
+		oneBall: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/1-ball.jpg",
+		},
+		thirteenBall: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/13-ball.jpg",
+		},
+		volley: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/volley.jpg",
+		},
+		tennis: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/tennis.jpg",
+		},
+		soccer: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/soccer.jpg",
+		},
+		animator: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/animator.jpg",
+		},
+		jupiter: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/jupiter.jpg",
 		},
 	});
 
@@ -110,7 +146,7 @@ export function clear() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
 
-export function draw(_color: number, position: Coord2) {
+export function draw(color: number, position: Coord2) {
 	const programInfo =
 		program! && twgl.createProgramInfoFromProgram(gl, program!);
 
@@ -141,7 +177,8 @@ export function draw(_color: number, position: Coord2) {
 		u_specular: [0.5, 0.5, 0.5, 1],
 		u_shininess: 50,
 		u_specularFactor: 1,
-		u_diffuseMap: textures.sharks, //[color],
+		u_diffuseMap:
+			textures[Object.keys(textures)[color % Object.keys(textures).length]],
 		u_position: [position.x, position.y, 0, 0],
 	};
 
