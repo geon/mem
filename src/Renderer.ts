@@ -1,6 +1,7 @@
 import { Coord2 } from "./Coord2";
 import * as twgl from "twgl.js";
 import { meshToWebglArrays, makeTesselatedSphereMesh } from "./functions";
+import { Board } from "./Board";
 
 const canvas = document.getElementsByTagName("canvas")[0] as HTMLCanvasElement;
 export const gl = canvas.getContext("webgl") as WebGLRenderingContext;
@@ -167,11 +168,21 @@ export function draw(color: number, position: Coord2) {
 
 	twgl.setBuffersAndAttributes(gl, programInfo, bufferInfo);
 
-	const fov = 30 * Math.PI / 180;
 	const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+	const boardWidth = Board.size.x + 2;
+	const boardHeight = Board.size.y + 2;
+	const halfVisibleWidth = Math.max(boardWidth, boardWidth * aspect) / 2;
+	const halfVisibleHeight = Math.max(boardHeight, boardHeight / aspect) / 2;
 	const zNear = 0.5;
 	const zFar = 30;
-	const projection = twgl.m4.perspective(fov, aspect, zNear, zFar);
+	const projection = twgl.m4.ortho(
+		-halfVisibleWidth,
+		halfVisibleWidth,
+		-halfVisibleHeight,
+		halfVisibleHeight,
+		zNear,
+		zFar,
+	);
 	const eye = [1, 4, 12];
 	const target = [0, 0, 0];
 	const up = [0, 1, 0];
