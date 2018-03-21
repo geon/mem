@@ -29,7 +29,7 @@ export class Board {
 	}
 
 	static size = new Coord2({ x: 4, y: 4 });
-	static numColors = 10;
+	static numColors = 13;
 
 	static xyToIndex(x: number, y: number) {
 		return x + y * Board.size.x;
