@@ -17,7 +17,8 @@ module.exports = {
   },
   devtool: "inline-source-map",
   devServer: {
-	contentBase: path.join(__dirname, 'src'),
+    host: "0.0.0.0",
+    contentBase: path.join(__dirname, "src"),
     stats: {
       assets: false,
       hash: false,
