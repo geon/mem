@@ -134,6 +134,18 @@ export function init() {
 			target: gl.TEXTURE_CUBE_MAP,
 			src: "graphics/jupiter.jpg",
 		},
+		poke: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/poke.png",
+		},
+		balance: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/balance.jpg",
+		},
+		basket: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/basket.jpg",
+		},
 	});
 
 	clear();
