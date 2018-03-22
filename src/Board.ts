@@ -22,10 +22,25 @@ export class Board {
 		});
 		this.queuedPiece.setPicked(true);
 
-		// TODO: Input.
-		// for (let i = 0; i < Board.size.x * Board.size.y; ++i) {
-		// 	button.addEventListener("click", () => this.pick(i));
-		// }
+		Renderer.canvas.addEventListener("click", event => {
+			const aspect = Renderer.canvas.clientWidth / Renderer.canvas.clientHeight;
+			const boardWidth = Board.size.x + 2;
+			const boardHeight = Board.size.y + 2;
+			const visibleWidth = Math.max(boardWidth, boardWidth * aspect);
+			const visibleHeight = Math.max(boardHeight, boardHeight / aspect);
+
+			const mouseWorldCoordX =
+				(event.offsetX / Renderer.canvas.clientWidth - 0.5) * visibleWidth;
+			const mouseWorldCoordY =
+				-(event.offsetY / Renderer.canvas.clientHeight - 0.5) * visibleHeight;
+
+			const x = Math.floor(mouseWorldCoordX + Board.size.x / 2);
+			const y = Math.floor(mouseWorldCoordY + Board.size.y / 2);
+
+			if (x >= 0 && x < Board.size.x && y >= 0 && y < Board.size.y) {
+				this.pick(Board.coordToIndex(new Coord2({ x, y })));
+			}
+		});
 	}
 
 	static size = new Coord2({ x: 4, y: 4 });
