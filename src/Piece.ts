@@ -25,8 +25,9 @@ export class Piece {
 	}
 
 	draw(position: Coord2) {
-		if (this.picked || this.colorIsVisible) {
-			Renderer.draw(this.color, position);
-		}
+		Renderer.draw(
+			this.picked || this.colorIsVisible ? this.color : -1,
+			position,
+		);
 	}
 }
