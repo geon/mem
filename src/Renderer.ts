@@ -3,10 +3,13 @@ import * as twgl from "twgl.js";
 import { meshToWebglArrays, makeTesselatedSphereMesh } from "./functions";
 import { Board } from "./Board";
 
-const canvas = document.getElementsByTagName("canvas")[0] as HTMLCanvasElement;
+// TODO: Make it owned bu the app?
+export const canvas = document.getElementsByTagName(
+	"canvas",
+)[0] as HTMLCanvasElement;
 export const gl = canvas.getContext("webgl") as WebGLRenderingContext;
 
-let program: WebGLProgram | undefined;
+let programInfo: twgl.ProgramInfo;
 let textures: {
 	[key: string]: WebGLTexture;
 };
@@ -14,7 +17,7 @@ let textures: {
 export function init() {
 	twgl.resizeCanvasToDisplaySize(canvas, window.devicePixelRatio);
 
-	program = twgl.createProgramFromSources(gl, [
+	const program = twgl.createProgramFromSources(gl, [
 		`
 			uniform mat4 u_worldViewProjection;
 			uniform vec3 u_lightWorldPos;
@@ -149,19 +152,7 @@ export function init() {
 		},
 	});
 
-	clear();
-}
-
-const ballArrays = meshToWebglArrays(makeTesselatedSphereMesh(0.4, 8));
-const bufferInfo = twgl.createBufferInfoFromArrays(gl, ballArrays);
-
-export function clear() {
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-}
-
-export function draw(color: number, position: Coord2) {
-	const programInfo =
-		program! && twgl.createProgramInfoFromProgram(gl, program!);
+	programInfo = program && twgl.createProgramInfoFromProgram(gl, program)!;
 
 	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 	gl.useProgram(programInfo.program);
@@ -191,30 +182,42 @@ export function draw(color: number, position: Coord2) {
 	const view = twgl.m4.inverse(camera);
 	const viewProjection = twgl.m4.multiply(projection, view);
 	const world = twgl.m4.rotationY(0);
-	const model = twgl.m4.multiply(
-		twgl.m4.rotationY(new Date().getTime() / 1000),
-		twgl.m4.rotationX(new Date().getTime() / 1341),
-	);
 
-	const uniforms: any = {
+	twgl.setUniforms(programInfo, {
 		u_lightWorldPos: [-4, 8, 10],
 		u_lightColor: [1, 0.8, 0.8, 1],
 		u_ambient: [0.5, 0.5, 0.5, 1],
 		u_specular: [0.5, 0.5, 0.5, 1],
 		u_shininess: 50,
 		u_specularFactor: 1,
+		u_viewInverse: camera,
+		u_world: world,
+		u_worldInverseTranspose: twgl.m4.transpose(twgl.m4.inverse(world)),
+		u_worldViewProjection: twgl.m4.multiply(viewProjection, world),
+	});
+
+	clear();
+}
+
+const ballArrays = meshToWebglArrays(makeTesselatedSphereMesh(0.4, 8));
+const bufferInfo = twgl.createBufferInfoFromArrays(gl, ballArrays);
+
+export function clear() {
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+}
+
+export function draw(color: number, position: Coord2) {
+	const model = twgl.m4.multiply(
+		twgl.m4.rotationY(new Date().getTime() / 1000),
+		twgl.m4.rotationX(new Date().getTime() / 1341),
+	);
+
+	twgl.setUniforms(programInfo, {
+		u_model: model,
 		u_diffuseMap:
 			textures[Object.keys(textures)[color % Object.keys(textures).length]],
 		u_position: [position.x, position.y, 0, 0],
-	};
-
-	uniforms.u_viewInverse = camera;
-	uniforms.u_world = world;
-	uniforms.u_model = model;
-	uniforms.u_worldInverseTranspose = twgl.m4.transpose(twgl.m4.inverse(world));
-	uniforms.u_worldViewProjection = twgl.m4.multiply(viewProjection, world);
-
-	twgl.setUniforms(programInfo, uniforms);
+	});
 
 	twgl.drawBufferInfo(gl, bufferInfo);
 }
