@@ -1,6 +1,7 @@
 import { Coord2 } from "./Coord2";
 import { waitMs } from "./functions";
 import * as Renderer from "./Renderer";
+import { Board } from "./Board";
 
 export class Piece {
 	color: number;
@@ -26,7 +27,7 @@ export class Piece {
 
 	draw(position: Coord2) {
 		Renderer.draw(
-			this.picked || this.colorIsVisible ? this.color : -1,
+			this.picked || this.colorIsVisible ? this.color : Board.numColors,
 			position,
 		);
 	}

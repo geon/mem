@@ -150,6 +150,10 @@ export function init() {
 			target: gl.TEXTURE_CUBE_MAP,
 			src: "graphics/basket.jpg",
 		},
+		hidden: {
+			target: gl.TEXTURE_CUBE_MAP,
+			src: "graphics/hidden.jpg",
+		},
 	});
 
 	programInfo = program && twgl.createProgramInfoFromProgram(gl, program)!;
