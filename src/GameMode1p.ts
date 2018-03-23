@@ -11,18 +11,17 @@ export class GameMode1p implements GameMode {
 	}
 
 	onUnlockedPair(_board: Board) {
-		console.log("unlocked pair");
 		// TODO
 	}
 
 	onGameOver(_board: Board) {
-		console.log("game over");
 		// TODO
+		alert("game over");
 	}
 
 	onWin(_board: Board) {
-		console.log("win");
 		// TODO
+		alert("you won");
 	}
 
 	*makeFrameCoroutine(): IterableIterator<void> {
