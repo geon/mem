@@ -37,8 +37,13 @@ export class App {
 			const deltaTime = Math.min(currentTime - this.lastRenderTime, 100);
 			this.lastRenderTime = currentTime;
 
-			this.gameMode.frameCoroutine.next(deltaTime);
+			const done = this.gameMode.frameCoroutine.next(deltaTime).done;
 			this.gameMode.draw();
+
+			// Restart the game after game over.
+			if (done) {
+				this.gameMode = new GameMode1p();
+			}
 		}
 	}
 }
