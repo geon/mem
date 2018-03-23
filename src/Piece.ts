@@ -20,7 +20,7 @@ export class Piece {
 	}
 
 	*makeFrameCoroutine(): IterableIterator<void> {
-		yield* waitMs(1000);
+		yield* waitMs(2000);
 		this.colorIsVisible = false;
 	}
 
