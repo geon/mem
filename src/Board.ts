@@ -18,7 +18,7 @@ export class Board {
 		this.pickedPiece = undefined;
 		this.pieces = [];
 		this.queuedPiece = new Piece({
-			color: this.randomColor(),
+			color: randomElement(this.allColors())!,
 		});
 		this.queuedPiece.setPicked(true);
 
@@ -101,16 +101,14 @@ export class Board {
 		return false;
 	}
 
-	randomColorFromExisting() {
-		const possibleColors = Array.from(
+	existingColors() {
+		return Array.from(
 			new Set(this.pieces.filter(piece => !!piece).map(piece => piece!.color)),
 		);
-		return randomElement(possibleColors);
 	}
 
-	randomColor() {
-		const possibleColors = Array.from(range(0, Board.numColors));
-		return randomElement(possibleColors)!;
+	allColors() {
+		return Array.from(range(0, Board.numColors));
 	}
 
 	*makeFrameCoroutine(): IterableIterator<void> {
@@ -177,7 +175,7 @@ export class Board {
 				// TODO: Should not queue up same color twice in a row.
 				// Queue up a new piece.
 				this.queuedPiece = new Piece({
-					color: this.randomColorFromExisting()!,
+					color: randomElement(this.existingColors())!,
 				});
 				this.queuedPiece.setPicked(true);
 
@@ -192,7 +190,7 @@ export class Board {
 	*initializationCoroutine() {
 		// Add initial pieces.
 		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; ++i) {
-			const color = this.randomColor();
+			const color = randomElement(this.allColors())!;
 			this.addPiece(color);
 			yield* waitMs(100);
 		}
