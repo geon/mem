@@ -32,26 +32,13 @@ export class App {
 		// Start the loop.
 		for (;;) {
 			const currentTime = await requestAnimFrame();
-			this.render(currentTime);
+
+			// Calculate delta time. Cap it to make debugging easier.
+			const deltaTime = Math.min(currentTime - this.lastRenderTime, 100);
+			this.lastRenderTime = currentTime;
+
+			this.gameMode.frameCoroutine.next(deltaTime);
+			this.gameMode.draw();
 		}
-	}
-
-	render(currentTime: number) {
-		// Calculate delta time. Cap it to make debugging easier.
-		const deltaTime = Math.min(currentTime - this.lastRenderTime, 100);
-		this.lastRenderTime = currentTime;
-
-		// // Draw the board background.
-		// this.context.fillStyle = "rgba(0, 0, 0, 1)";
-		// this.context.fillRect(0, 0, this.getWidth(), this.getHeight());
-
-		// Boards and avatars.
-		this.gameMode.frameCoroutine.next(deltaTime);
-		this.gameMode.draw();
-
-		// FPS counter.
-		// this.context.fillStyle = "black";
-		// this.context.font = "16px Palatino";
-		// this.context.fillText("FPS: " + Math.floor(1000/deltaTime), 10, 20);
 	}
 }
