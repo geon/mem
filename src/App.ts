@@ -12,33 +12,28 @@ export class App {
 		this.lastRenderTime = 0;
 	}
 
-	startGame() {
+	async startGame() {
 		// Set up the renderer.
 
 		Renderer.init();
 
-		const requestAnimFrame: (
-			callback: (currentTime: number) => void,
-		) => void = (() => {
-			return (
-				window.requestAnimationFrame ||
-				(window as any).webkitRequestAnimationFrame ||
-				(window as any).mozRequestAnimationFrame ||
-				(window as any).oRequestAnimationFrame ||
-				(window as any).msRequestAnimationFrame ||
-				(callback => {
-					window.setTimeout(callback, 1000 / 60, new Date().getTime());
-				})
-			);
-		})();
+		const requestAnimFrame = () =>
+			new Promise<number>(resolve => {
+				(window.requestAnimationFrame ||
+					(window as any).webkitRequestAnimationFrame ||
+					(window as any).mozRequestAnimationFrame ||
+					(window as any).oRequestAnimationFrame ||
+					(window as any).msRequestAnimationFrame ||
+					(callback => {
+						window.setTimeout(callback, 1000 / 60, new Date().getTime());
+					}))(resolve);
+			});
 
 		// Start the loop.
-		// TODO: Convert to generator?
-		const loop = (currentTime: number) => {
+		for (;;) {
+			const currentTime = await requestAnimFrame();
 			this.render(currentTime);
-			requestAnimFrame(loop);
-		};
-		requestAnimFrame(loop);
+		}
 	}
 
 	render(currentTime: number) {
