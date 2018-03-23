@@ -12,12 +12,8 @@ export class App {
 		this.lastRenderTime = 0;
 	}
 
-	async startGame() {
+	startGame() {
 		// Set up the renderer.
-		this.startRenderLoop();
-	}
-
-	startRenderLoop() {
 
 		Renderer.init();
 
