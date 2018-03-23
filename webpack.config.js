@@ -13,7 +13,6 @@ module.exports = {
 	module: {
 		rules: [{ test: /\.ts?$/, loader: "ts-loader" }],
 	},
-	devtool: "inline-source-map",
 	devServer: {
 		host: "0.0.0.0",
 		contentBase: path.join(__dirname, "src"),

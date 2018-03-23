@@ -5,12 +5,12 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "webpack-dev-server",
+		"start": "webpack-dev-server -d",
 		"tsc": "tsc",
 		"lint": "tslint -c tslint.json 'src/**/*.ts' -e 'src/**/*.d.ts' --fix",
 		"build:clean": "rm -rf dist",
 		"build":
-			"npm run build:clean && webpack && cp -r src/graphics dist/ && cp src/index.html dist/",
+			"npm run build:clean && webpack-cli --mode production --optimize-minimize && cp -r src/graphics dist/ && cp src/index.html dist/",
 		"publish": "npm run build && ./publish.sh"
 	},
 	"repository": {
@@ -25,11 +25,12 @@
 	"homepage": "https://github.com/geon/mem",
 	"devDependencies": {
 		"prettier": "^1.9.2",
-		"ts-loader": "^3.2.0",
+		"ts-loader": "^4.1.0",
 		"tslint": "^5.8.0",
 		"typescript": "^2.6.2",
-		"webpack": "^3.10.0",
-		"webpack-dev-server": "^2.9.7"
+		"webpack": "^4.2.0",
+		"webpack-cli": "^2.0.13",
+		"webpack-dev-server": "^3.1.1"
 	},
 	"prettier": {
 		"useTabs": true,
