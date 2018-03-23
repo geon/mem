@@ -8,19 +8,16 @@ export class Board {
 	gameMode: GameMode;
 	frameCoroutine: IterableIterator<void>;
 	pieces: Array<Piece | undefined>;
-	queuedPiece: Piece;
+	queuedPiece: Piece | undefined;
 	pickedPiece: Piece | undefined;
 
 	constructor(options: { gameMode: GameMode }) {
 		this.gameMode = options.gameMode;
 
 		this.frameCoroutine = this.makeFrameCoroutine();
+		this.queuedPiece = undefined;
 		this.pickedPiece = undefined;
 		this.pieces = [];
-		this.queuedPiece = new Piece({
-			color: randomElement(this.allColors())!,
-		});
-		this.queuedPiece.setPicked(true);
 
 		Renderer.canvas.addEventListener("click", event => {
 			const aspect = Renderer.canvas.clientWidth / Renderer.canvas.clientHeight;
@@ -124,9 +121,10 @@ export class Board {
 
 			const done = gameFlowCoroutine.next(deltaTime).done;
 
-			[this.queuedPiece.frameCoroutine, ...pieceCoroutines].forEach(coroutine =>
-				coroutine.next(deltaTime),
-			);
+			[
+				...(this.queuedPiece ? [this.queuedPiece.frameCoroutine] : []),
+				...pieceCoroutines,
+			].forEach(coroutine => coroutine.next(deltaTime));
 
 			if (done) {
 				return;
@@ -143,7 +141,7 @@ export class Board {
 		// Normal gameplay.
 		for (;;) {
 			// Wait for the player to pick a piece.
-			if (this.pickedPiece) {
+			if (this.pickedPiece && this.queuedPiece) {
 				// Give the player a chance to compare the pieces visually.
 				yield* waitMs(1000);
 
@@ -187,7 +185,7 @@ export class Board {
 					// avoid queuing up the same color twice in a row.
 					color: randomElement(
 						this.existingColors().filter(
-							color => color != this.queuedPiece.color,
+							color => color != (this.queuedPiece && this.queuedPiece.color),
 						),
 					)!,
 				});
@@ -208,14 +206,24 @@ export class Board {
 			this.addPiece(color);
 			yield* waitMs(100);
 		}
+
+		// There must be a queued up piece to play.
+		this.queuedPiece = new Piece({
+			color: randomElement(this.existingColors())!,
+		});
+		this.queuedPiece.setPicked(true);
+
+		console.log(this.pieces);
+		console.log(this.queuedPiece);
 	}
 
 	draw() {
 		Renderer.clear();
 
-		this.queuedPiece.draw(
-			Coord2.add(Board.size.scaled(0.5), new Coord2({ x: 0.5, y: 0.5 })),
-		);
+		this.queuedPiece &&
+			this.queuedPiece.draw(
+				Coord2.add(Board.size.scaled(0.5), new Coord2({ x: 0.5, y: 0.5 })),
+			);
 
 		for (let i = 0; i < Board.size.x * Board.size.y; ++i) {
 			const piece = this.pieces[i];
