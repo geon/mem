@@ -172,10 +172,15 @@ export class Board {
 					}
 				}
 
-				// TODO: Should not queue up same color twice in a row.
 				// Queue up a new piece.
 				this.queuedPiece = new Piece({
-					color: randomElement(this.existingColors())!,
+					// Pick any existing color (or finding the match is impossible), but
+					// avoid queuing up the same color twice in a row.
+					color: randomElement(
+						this.existingColors().filter(
+							color => color != this.queuedPiece.color,
+						),
+					)!,
 				});
 				this.queuedPiece.setPicked(true);
 
