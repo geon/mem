@@ -122,13 +122,15 @@ export class Board {
 				.filter(piece => !!piece)
 				.map(piece => piece!.frameCoroutine);
 
-			const allCoroutines = [
-				gameFlowCoroutine,
-				this.queuedPiece.frameCoroutine,
-				...pieceCoroutines,
-			];
+			const done = gameFlowCoroutine.next(deltaTime).done;
 
-			allCoroutines.forEach(coroutine => coroutine.next(deltaTime));
+			[this.queuedPiece.frameCoroutine, ...pieceCoroutines].forEach(coroutine =>
+				coroutine.next(deltaTime),
+			);
+
+			if (done) {
+				return;
+			}
 		}
 	}
 
@@ -160,6 +162,9 @@ export class Board {
 					if (this.pieces.filter(piece => !!piece).length < 2) {
 						// Notify the game mode.
 						this.gameMode.onWin(this);
+
+						// TODO: Move the notifying of winning to the return value?
+						return;
 					}
 				} else {
 					// Punish player.
@@ -171,7 +176,8 @@ export class Board {
 
 						// TODO: Clear board animation.
 
-						break;
+						// TODO: Move the notifying of losing to the return value?
+						return;
 					}
 				}
 
