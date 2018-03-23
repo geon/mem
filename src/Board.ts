@@ -140,6 +140,7 @@ export class Board {
 
 		// Normal gameplay.
 		for (;;) {
+			// Wait for the player to pick a piece.
 			if (this.pickedPiece) {
 				// Give the player a chance to compare the pieces visually.
 				yield* waitMs(1000);
@@ -147,15 +148,17 @@ export class Board {
 				if (this.pickedPiece.color == this.queuedPiece.color) {
 					// The player found a pair.
 
+					// Notify the game mode.
+					this.gameMode.onUnlockedPair(this);
+
 					// Remove the picked piece from the board.
 					this.pieces = this.pieces.map(
 						piece => (piece != this.pickedPiece ? piece : undefined),
 					);
 
-					// Notify the game mode.
-					this.gameMode.onUnlockedPair(this);
-
+					// Detect win.
 					if (this.pieces.filter(piece => !!piece).length < 2) {
+						// Notify the game mode.
 						this.gameMode.onWin(this);
 					}
 				} else {
