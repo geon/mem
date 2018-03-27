@@ -25,7 +25,6 @@ export function init() {
 			uniform mat4 u_model;
 			uniform mat4 u_viewInverse;
 			uniform mat4 u_worldInverseTranspose;
-			uniform vec4 u_position;
 
 			attribute vec4 position;
 			attribute vec3 normal;
@@ -38,7 +37,7 @@ export function init() {
 			varying vec3 v_surfaceToView;
 
 			void main() {
-				v_position = u_worldViewProjection * ((u_model * position) + u_position);
+				v_position = u_worldViewProjection * u_model * position;
 				v_normal = (u_worldInverseTranspose * u_model * vec4(normal, 0)).xyz;
 				v_texCoord = texCoord;
 				v_surfaceToLight = u_lightWorldPos - (u_world * position).xyz;
@@ -212,15 +211,17 @@ export function clear() {
 
 export function draw(color: number, position: Coord2) {
 	const model = twgl.m4.multiply(
-		twgl.m4.rotationY(new Date().getTime() / 1000),
-		twgl.m4.rotationX(new Date().getTime() / 1341),
+		twgl.m4.translation([position.x, position.y, 0, 0]),
+		twgl.m4.multiply(
+			twgl.m4.rotationY(new Date().getTime() / 1000),
+			twgl.m4.rotationX(new Date().getTime() / 1341),
+		),
 	);
 
 	twgl.setUniforms(programInfo, {
 		u_model: model,
 		u_diffuseMap:
 			textures[Object.keys(textures)[color % Object.keys(textures).length]],
-		u_position: [position.x, position.y, 0, 0],
 	});
 
 	twgl.drawBufferInfo(gl, bufferInfo);
