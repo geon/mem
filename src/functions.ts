@@ -43,18 +43,18 @@ interface Vertex {
 	normal: Coord3;
 	texCoord: Coord3;
 }
-interface Mesh {
-	vertices: ReadonlyArray<Vertex>;
-	indices: ReadonlyArray<number>;
-}
-interface MutableMesh {
-	vertices: Array<Vertex>;
-	indices: Array<number>;
-}
-export function makeTesselatedCubeMesh(tesselation: number): Mesh {
-	function makeSide(uAxis: Coord3, vAxis: Coord3, normal: Coord3): Mesh {
+type Triangle = [Vertex, Vertex, Vertex];
+type TriangleSoup = ReadonlyArray<Triangle>;
+type MutableTriangleSoup = Array<Triangle>;
+
+export function makeTesselatedCubeMesh(tesselation: number): TriangleSoup {
+	function makeSide(
+		uAxis: Coord3,
+		vAxis: Coord3,
+		normal: Coord3,
+	): TriangleSoup {
 		const vertices: Array<Vertex> = [];
-		const indices: Array<number> = [];
+		const triangles: MutableTriangleSoup = [];
 
 		for (let v = 0; v <= tesselation; ++v) {
 			const vFactor = v / tesselation;
@@ -81,15 +81,20 @@ export function makeTesselatedCubeMesh(tesselation: number): Mesh {
 		for (let v = 0; v < tesselation; ++v) {
 			for (let u = 0; u < tesselation; ++u) {
 				const i = u + v * (tesselation + 1);
-				indices.push(i, i + 1, i + (tesselation + 1));
-				indices.push(i + 1, i + 1 + (tesselation + 1), i + (tesselation + 1));
+				triangles.push([
+					vertices[i],
+					vertices[i + 1],
+					vertices[i + (tesselation + 1)],
+				]);
+				triangles.push([
+					vertices[i + 1],
+					vertices[i + 1 + (tesselation + 1)],
+					vertices[i + (tesselation + 1)],
+				]);
 			}
 		}
 
-		return {
-			vertices,
-			indices,
-		};
+		return triangles;
 	}
 
 	const sideArguments = [
@@ -126,44 +131,60 @@ export function makeTesselatedCubeMesh(tesselation: number): Mesh {
 		},
 	];
 
-	return mergeMeshes(
-		sideArguments.map(({ uAxis, vAxis, normal }) =>
-			makeSide(uAxis, vAxis, normal),
+	return mergeMesh(
+		([] as TriangleSoup).concat(
+			...sideArguments.map(({ uAxis, vAxis, normal }) =>
+				makeSide(uAxis, vAxis, normal),
+			),
 		),
 	);
 }
-function mergeMeshes(meshes: ReadonlyArray<Mesh>): Mesh {
-	let indexStart = 0;
-	return meshes.reduce(
-		(soFar: MutableMesh, current) => {
-			soFar.vertices.push(...current.vertices);
-			soFar.indices.push(...current.indices.map(index => index + indexStart));
-			indexStart += current.vertices.length;
-			return soFar;
-		},
-		{
-			vertices: [],
-			indices: [],
-		} as MutableMesh,
+function mergeMesh(mesh: TriangleSoup): TriangleSoup {
+	const newMesh: MutableTriangleSoup = [];
+	const seenVertices: Array<Vertex> = [];
+
+	for (const triangle of mesh) {
+		newMesh.push(triangle.map(vertex => {
+			// Replace each vertex with an existing one if it is identical.
+			const existingVertex = seenVertices.find(seenVertex =>
+				deepVertexEqual(seenVertex, vertex),
+			);
+			seenVertices.push(vertex);
+			return existingVertex || vertex;
+		}) as Triangle);
+	}
+
+	return newMesh;
+}
+function deepVertexEqual(a: Vertex, b: Vertex) {
+	const epsilon = 0.00001;
+	const propertyNames = ["position", "normal", "texCoord"] as ReadonlyArray<
+		keyof Vertex
+	>;
+	return propertyNames.every(
+		propertyName => Coord3.distance(a[propertyName], b[propertyName]) < epsilon,
 	);
 }
 
 export function makeTesselatedSphereMesh(
 	radius: number,
 	tesselation: number,
-): Mesh {
-	const mesh = makeTesselatedCubeMesh(tesselation) as MutableMesh;
+): TriangleSoup {
+	const mesh = makeTesselatedCubeMesh(tesselation) as MutableTriangleSoup;
 
-	mesh.vertices = mesh.vertices.map(vertex => {
-		const normalizedPosition = vertex.position.normalized();
-		return {
-			position: normalizedPosition.scaled(radius),
-			normal: normalizedPosition,
-			texCoord: vertex.texCoord,
-		};
-	});
-
-	return mesh;
+	return mergeMesh(
+		mesh.map(
+			triangle =>
+				triangle.map(vertex => {
+					const normalizedPosition = vertex.position.normalized();
+					return {
+						position: normalizedPosition.scaled(radius),
+						normal: normalizedPosition,
+						texCoord: vertex.texCoord,
+					};
+				}) as Triangle,
+		),
+	);
 }
 
 // function coord2ToTwglVec2(coord: Coord2): Array<number> {
@@ -172,11 +193,25 @@ export function makeTesselatedSphereMesh(
 function coord3ToTwglVec3(coord: Coord3): Array<number> {
 	return [coord.x, coord.y, coord.z];
 }
-export function meshToWebglArrays(mesh: Mesh): twgl.Arrays {
+export function meshToWebglArrays(mesh: TriangleSoup): twgl.Arrays {
+	const vertices: Array<Vertex> = [];
+	const indices: Array<number> = [];
+
+	for (const triangle of mesh) {
+		for (const vertex of triangle) {
+			const index = vertices.indexOf(vertex);
+			if (index != -1) {
+				indices.push(index);
+			} else {
+				indices.push(vertices.push(vertex) - 1);
+			}
+		}
+	}
+
 	return {
 		position: {
 			numComponents: 3,
-			data: mesh.vertices
+			data: vertices
 				.map(vertex => vertex.position)
 				.map(coord3ToTwglVec3)
 				.reduce((soFar, current) => {
@@ -186,7 +221,7 @@ export function meshToWebglArrays(mesh: Mesh): twgl.Arrays {
 		},
 		normal: {
 			numComponents: 3,
-			data: mesh.vertices
+			data: vertices
 				.map(vertex => vertex.normal)
 				.map(coord3ToTwglVec3)
 				.reduce((soFar, current) => {
@@ -196,7 +231,7 @@ export function meshToWebglArrays(mesh: Mesh): twgl.Arrays {
 		},
 		texCoord: {
 			numComponents: 3,
-			data: mesh.vertices
+			data: vertices
 				.map(vertex => vertex.texCoord)
 				.map(coord3ToTwglVec3)
 				.reduce((soFar, current) => {
@@ -204,6 +239,6 @@ export function meshToWebglArrays(mesh: Mesh): twgl.Arrays {
 					return soFar;
 				}, []),
 		},
-		indices: { numComponents: 3, data: mesh.indices as Array<number> },
+		indices: { numComponents: 3, data: indices },
 	};
 }
