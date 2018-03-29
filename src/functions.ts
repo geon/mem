@@ -53,11 +53,13 @@ export function makeTesselatedCubeMesh(tesselation: number): TriangleSoup {
 		vAxis: Coord3,
 		normal: Coord3,
 	): TriangleSoup {
-		const vertices: Array<Vertex> = [];
+		const vertices: Array<Array<Vertex>> = [];
 		const triangles: MutableTriangleSoup = [];
 
 		for (let v = 0; v <= tesselation; ++v) {
 			const vFactor = v / tesselation;
+
+			vertices[v] = [];
 
 			for (let u = 0; u <= tesselation; ++u) {
 				const uFactor = u / tesselation;
@@ -70,26 +72,25 @@ export function makeTesselatedCubeMesh(tesselation: number): TriangleSoup {
 					normal,
 				);
 
-				vertices.push({
+				vertices[v][u] = {
 					position,
 					normal,
 					texCoord: position.normalized(),
-				});
+				};
 			}
 		}
 
 		for (let v = 0; v < tesselation; ++v) {
 			for (let u = 0; u < tesselation; ++u) {
-				const i = u + v * (tesselation + 1);
 				triangles.push([
-					vertices[i],
-					vertices[i + 1],
-					vertices[i + (tesselation + 1)],
+					vertices[v + 0][u + 0],
+					vertices[v + 0][u + 1],
+					vertices[v + 1][u + 0],
 				]);
 				triangles.push([
-					vertices[i + 1],
-					vertices[i + 1 + (tesselation + 1)],
-					vertices[i + (tesselation + 1)],
+					vertices[v + 1][u + 0],
+					vertices[v + 0][u + 1],
+					vertices[v + 1][u + 1],
 				]);
 			}
 		}
