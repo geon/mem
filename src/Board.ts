@@ -217,9 +217,6 @@ export class Board {
 			color: randomElement(this.existingColors())!,
 		});
 		this.queuedPiece.setPicked(true);
-
-		console.log(this.pieces);
-		console.log(this.queuedPiece);
 	}
 
 	draw() {
