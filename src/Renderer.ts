@@ -2,6 +2,8 @@ import { Coord2 } from "./Coord2";
 import * as twgl from "twgl.js";
 import { meshToWebglArrays, makeTesselatedSphereMesh } from "./functions";
 import { Board } from "./Board";
+import { vertexShader, fragmentShader } from "./shaders";
+import { textureInfo } from "./textures";
 
 export class Renderer {
 	gl: WebGLRenderingContext;
@@ -14,151 +16,23 @@ export class Renderer {
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.gl = canvas.getContext("webgl")!;
+
+		const program = twgl.createProgramFromSources(this.gl, [
+			vertexShader,
+			fragmentShader,
+		]);
+
+		this.programInfo = twgl.createProgramInfoFromProgram(this.gl, program);
+
 		this.ballArrays = meshToWebglArrays(makeTesselatedSphereMesh(0.4, 8));
 		this.bufferInfo = twgl.createBufferInfoFromArrays(this.gl, this.ballArrays);
 
 		twgl.resizeCanvasToDisplaySize(canvas, window.devicePixelRatio);
 
-		const program = twgl.createProgramFromSources(this.gl, [
-			`
-			uniform mat4 u_worldViewProjection;
-			uniform vec3 u_lightWorldPos;
-			uniform mat4 u_world;
-			uniform mat4 u_model;
-			uniform mat4 u_viewInverse;
-			uniform mat4 u_worldInverseTranspose;
-
-			attribute vec4 position;
-			attribute vec3 normal;
-			attribute vec3 texCoord;
-
-			varying vec4 v_position;
-			varying vec3 v_normal;
-			varying vec3 v_texCoord;
-			varying vec3 v_surfaceToLight;
-			varying vec3 v_surfaceToView;
-
-			void main() {
-				v_position = u_worldViewProjection * u_model * position;
-				v_normal = (u_worldInverseTranspose * u_model * vec4(normal, 0)).xyz;
-				v_texCoord = texCoord;
-				v_surfaceToLight = u_lightWorldPos - (u_world * position).xyz;
-				v_surfaceToView = (u_viewInverse[3] - (u_world * position)).xyz;
-				gl_Position = v_position;
-			}
-		`,
-			`
-			precision mediump float;
-
-			varying vec4 v_position;
-			varying vec3 v_normal;
-			varying vec3 v_texCoord;
-			varying vec3 v_surfaceToLight;
-			varying vec3 v_surfaceToView;
-
-			uniform vec4 u_lightColor;
-			uniform vec4 u_ambient;
-			uniform vec4 u_specular;
-			uniform float u_shininess;
-			uniform float u_specularFactor;
-			uniform samplerCube u_diffuseMap;
-
-			vec4 lit(float l ,float h, float m) {
-				return vec4(
-					1.0,
-					max(l, 0.0),
-					(l > 0.0) ? pow(max(0.0, h), m) : 0.0,
-					1.0
-				);
-			}
-
-			void main() {
-				vec4 diffuseColor = textureCube(u_diffuseMap, normalize(v_texCoord));
-				vec3 a_normal = normalize(v_normal);
-				vec3 surfaceToLight = normalize(v_surfaceToLight);
-				vec3 surfaceToView = normalize(v_surfaceToView);
-				vec3 halfVector = normalize(surfaceToLight + surfaceToView);
-				vec4 litR = lit(
-					dot(a_normal, surfaceToLight),
-					dot(a_normal, halfVector),
-					u_shininess
-				);
-				vec4 outColor = vec4(
-					(u_lightColor * (
-						diffuseColor * litR.y + diffuseColor * u_ambient +
-						u_specular * litR.z * u_specularFactor
-					)).rgb,
-					diffuseColor.a
-				);
-				gl_FragColor = outColor;
-			}
-		`,
-		]);
-
 		this.gl.enable(this.gl.DEPTH_TEST);
 		this.gl.enable(this.gl.CULL_FACE);
 
-		this.textures = twgl.createTextures(this.gl, {
-			earth: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/earth.jpg",
-			},
-			globe: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/globe.jpg",
-			},
-			eye: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/eye.jpg",
-			},
-			oneBall: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/1-ball.jpg",
-			},
-			thirteenBall: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/13-ball.jpg",
-			},
-			volley: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/volley.jpg",
-			},
-			tennis: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/tennis.jpg",
-			},
-			soccer: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/soccer.jpg",
-			},
-			animator: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/animator.jpg",
-			},
-			jupiter: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/jupiter.jpg",
-			},
-			poke: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/poke.png",
-			},
-			balance: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/balance.jpg",
-			},
-			basket: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/basket.jpg",
-			},
-			hidden: {
-				target: this.gl.TEXTURE_CUBE_MAP,
-				src: "graphics/hidden.jpg",
-			},
-		});
-
-		this.programInfo =
-			program && twgl.createProgramInfoFromProgram(this.gl, program)!;
+		this.textures = twgl.createTextures(this.gl, textureInfo(this.gl));
 
 		this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 		this.gl.useProgram(this.programInfo.program);
