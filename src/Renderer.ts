@@ -11,7 +11,6 @@ export class Renderer {
 	textures: {
 		[key: string]: WebGLTexture;
 	};
-	ballArrays: twgl.Arrays;
 	bufferInfo: twgl.BufferInfo;
 
 	constructor(canvas: HTMLCanvasElement) {
@@ -24,8 +23,8 @@ export class Renderer {
 
 		this.programInfo = twgl.createProgramInfoFromProgram(this.gl, program);
 
-		this.ballArrays = meshToWebglArrays(makeTesselatedSphereMesh(0.4, 8));
-		this.bufferInfo = twgl.createBufferInfoFromArrays(this.gl, this.ballArrays);
+		const ballArrays = meshToWebglArrays(makeTesselatedSphereMesh(0.4, 8));
+		this.bufferInfo = twgl.createBufferInfoFromArrays(this.gl, ballArrays);
 
 		twgl.resizeCanvasToDisplaySize(canvas, window.devicePixelRatio);
 
