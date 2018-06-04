@@ -1,12 +1,17 @@
 import { Board } from "./Board";
 import { GameMode } from "./GameMode";
+import { Renderer } from "./Renderer";
 
 export class GameMode1p implements GameMode {
 	board: Board;
 	frameCoroutine: IterableIterator<void>;
 
-	constructor() {
-		this.board = new Board({ gameMode: this });
+	constructor(options: { renderer: Renderer; canvas: HTMLCanvasElement }) {
+		this.board = new Board({
+			renderer: options.renderer,
+			canvas: options.canvas,
+			gameMode: this,
+		});
 		this.frameCoroutine = this.makeFrameCoroutine();
 	}
 

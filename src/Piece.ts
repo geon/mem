@@ -1,15 +1,17 @@
 import { Coord2 } from "./Coord2";
 import { waitMs } from "./functions";
-import * as Renderer from "./Renderer";
+import { Renderer } from "./Renderer";
 import { Board } from "./Board";
 
 export class Piece {
+	renderer: Renderer;
 	color: number;
 	colorIsVisible: boolean;
 	picked: boolean;
 	frameCoroutine: IterableIterator<void>;
 
-	constructor(options: { color: number }) {
+	constructor(options: { renderer: Renderer; color: number }) {
+		this.renderer = options.renderer;
 		this.color = options.color;
 		this.colorIsVisible = true;
 		this.picked = false;
@@ -26,7 +28,7 @@ export class Piece {
 	}
 
 	draw(position: Coord2) {
-		Renderer.draw(
+		this.renderer.draw(
 			this.picked || this.colorIsVisible ? this.color : Board.numColors,
 			position,
 		);

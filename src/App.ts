@@ -1,22 +1,24 @@
-import * as Renderer from "./Renderer";
+import { Renderer } from "./Renderer";
 import { GameMode } from "./GameMode";
 import { GameMode1p } from "./GameMode1p";
 
 export class App {
+	canvas: HTMLCanvasElement;
+	renderer: Renderer;
 	gameMode: GameMode;
-
 	lastRenderTime: number;
 
 	constructor() {
-		this.gameMode = new GameMode1p();
+		this.canvas = document.getElementsByTagName("canvas")[0];
+		this.renderer = new Renderer(this.canvas);
+		this.gameMode = new GameMode1p({
+			renderer: this.renderer,
+			canvas: this.canvas,
+		});
 		this.lastRenderTime = 0;
 	}
 
 	async startGame() {
-		// Set up the renderer.
-
-		Renderer.init();
-
 		const requestAnimFrame = () =>
 			new Promise<number>(resolve => {
 				(window.requestAnimationFrame ||
@@ -42,7 +44,10 @@ export class App {
 
 			// Restart the game after game over.
 			if (done) {
-				this.gameMode = new GameMode1p();
+				this.gameMode = new GameMode1p({
+					renderer: this.renderer,
+					canvas: this.canvas,
+				});
 			}
 		}
 	}

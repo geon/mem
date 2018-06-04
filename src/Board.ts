@@ -2,16 +2,24 @@ import { Coord2 } from "./Coord2";
 import { GameMode } from "./GameMode";
 import { Piece } from "./Piece";
 import { waitMs, range, randomElement } from "./functions";
-import * as Renderer from "./Renderer";
+import { Renderer } from "./Renderer";
 
 export class Board {
+	renderer: Renderer;
+	canvas: HTMLCanvasElement;
 	gameMode: GameMode;
 	frameCoroutine: IterableIterator<void>;
 	pieces: Array<Piece | undefined>;
 	queuedPiece: Piece | undefined;
 	pickedPiece: Piece | undefined;
 
-	constructor(options: { gameMode: GameMode }) {
+	constructor(options: {
+		renderer: Renderer;
+		canvas: HTMLCanvasElement;
+		gameMode: GameMode;
+	}) {
+		this.renderer = options.renderer;
+		this.canvas = options.canvas;
 		this.gameMode = options.gameMode;
 
 		this.frameCoroutine = this.makeFrameCoroutine();
@@ -19,17 +27,17 @@ export class Board {
 		this.pickedPiece = undefined;
 		this.pieces = [];
 
-		Renderer.canvas.addEventListener("click", event => {
-			const aspect = Renderer.canvas.clientWidth / Renderer.canvas.clientHeight;
+		this.canvas.addEventListener("click", event => {
+			const aspect = this.canvas.clientWidth / this.canvas.clientHeight;
 			const boardWidth = Board.size.x + 2;
 			const boardHeight = Board.size.y + 2;
 			const visibleWidth = Math.max(boardWidth, boardWidth * aspect);
 			const visibleHeight = Math.max(boardHeight, boardHeight / aspect);
 
 			const mouseWorldCoordX =
-				(event.offsetX / Renderer.canvas.clientWidth - 0.5) * visibleWidth;
+				(event.offsetX / this.canvas.clientWidth - 0.5) * visibleWidth;
 			const mouseWorldCoordY =
-				-(event.offsetY / Renderer.canvas.clientHeight - 0.5) * visibleHeight;
+				-(event.offsetY / this.canvas.clientHeight - 0.5) * visibleHeight;
 
 			const x = Math.floor(mouseWorldCoordX + Board.size.x / 2);
 			const y = Math.floor(mouseWorldCoordY + Board.size.y / 2);
@@ -89,6 +97,8 @@ export class Board {
 		for (const index of pieceAddOrder) {
 			if (!this.pieces[index]) {
 				this.pieces[index] = new Piece({
+					renderer: this.renderer,
+
 					color,
 				});
 				return true;
@@ -181,6 +191,8 @@ export class Board {
 
 				// Queue up a new piece.
 				this.queuedPiece = new Piece({
+					renderer: this.renderer,
+
 					// Pick any existing color (or finding the match is impossible), but
 					// avoid queuing up the same color twice in a row, or the
 					// color just picked.
@@ -214,13 +226,14 @@ export class Board {
 
 		// There must be a queued up piece to play.
 		this.queuedPiece = new Piece({
+			renderer: this.renderer,
 			color: randomElement(this.existingColors())!,
 		});
 		this.queuedPiece.setPicked(true);
 	}
 
 	draw() {
-		Renderer.clear();
+		this.renderer.clear();
 
 		this.queuedPiece &&
 			this.queuedPiece.draw(
