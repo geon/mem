@@ -11,7 +11,7 @@ export class Renderer {
 	textures: {
 		[key: string]: WebGLTexture;
 	};
-	bufferInfo: twgl.BufferInfo;
+	sphereMeshBufferInfo: twgl.BufferInfo;
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.gl = canvas.getContext("webgl")!;
@@ -23,8 +23,10 @@ export class Renderer {
 
 		this.programInfo = twgl.createProgramInfoFromProgram(this.gl, program);
 
-		const ballArrays = meshToWebglArrays(makeTesselatedSphereMesh(0.4, 8));
-		this.bufferInfo = twgl.createBufferInfoFromArrays(this.gl, ballArrays);
+		this.sphereMeshBufferInfo = twgl.createBufferInfoFromArrays(
+			this.gl,
+			meshToWebglArrays(makeTesselatedSphereMesh(0.4, 8)),
+		);
 
 		twgl.resizeCanvasToDisplaySize(canvas, window.devicePixelRatio);
 
@@ -35,8 +37,6 @@ export class Renderer {
 
 		this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 		this.gl.useProgram(this.programInfo.program);
-
-		twgl.setBuffersAndAttributes(this.gl, this.programInfo, this.bufferInfo);
 
 		const aspect = this.gl.canvas.clientWidth / this.gl.canvas.clientHeight;
 		const boardWidth = Board.size.x + 2;
@@ -82,7 +82,7 @@ export class Renderer {
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 	}
 
-	draw(color: number, position: Coord2) {
+	drawSphere(color: number, position: Coord2) {
 		const model = twgl.m4.multiply(
 			twgl.m4.translation([position.x, position.y, 0, 0]),
 			twgl.m4.multiply(
@@ -98,6 +98,12 @@ export class Renderer {
 			],
 		});
 
-		twgl.drawBufferInfo(this.gl, this.bufferInfo);
+		twgl.setBuffersAndAttributes(
+			this.gl,
+			this.programInfo,
+			this.sphereMeshBufferInfo,
+		);
+
+		twgl.drawBufferInfo(this.gl, this.sphereMeshBufferInfo);
 	}
 }

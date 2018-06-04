@@ -28,7 +28,7 @@ export class Piece {
 	}
 
 	draw(position: Coord2) {
-		this.renderer.draw(
+		this.renderer.drawSphere(
 			this.picked || this.colorIsVisible ? this.color : Board.numColors,
 			position,
 		);
