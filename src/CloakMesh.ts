@@ -1,5 +1,6 @@
 import { Coord3 } from "./Coord3";
-import { axisRotate } from "./functions";
+import { axisRotate, meshToWebglArrays } from "./functions";
+import * as twgl from "twgl.js";
 
 interface Vertex {
 	position: Coord3;
@@ -7,12 +8,11 @@ interface Vertex {
 	texCoord: Coord3;
 }
 type Triangle = [Vertex, Vertex, Vertex];
-type TriangleSoup = ReadonlyArray<Triangle>;
 type MutableTriangleSoup = Array<Triangle>;
 
 // TODO: Rewrite to keep a twgl.createAugmentedTypedArray and update it with new data.
 export class CloakMesh {
-	triangles: TriangleSoup;
+	triangles: twgl.Arrays;
 	uTesselation: number;
 	vTesselation: number;
 	innerRadius: number;
@@ -147,6 +147,6 @@ export class CloakMesh {
 			}
 		}
 
-		this.triangles = triangles;
+		this.triangles = meshToWebglArrays(triangles);
 	}
 }
