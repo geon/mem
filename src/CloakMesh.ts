@@ -123,11 +123,7 @@ export class CloakMesh {
 
 					const normal = axisRotate(
 						negX,
-						axisRotate(
-							posY,
-							negX.scaled(rimRadius),
-							uFactor * 180 + cloakFactor * 180,
-						),
+						axisRotate(posY, negX, uFactor * 180 + cloakFactor * 180),
 						vFactor * 360,
 					);
 
