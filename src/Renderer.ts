@@ -107,9 +107,32 @@ export class Renderer {
 			],
 		});
 
-		const cloakMeshArrays = this.cloakMesh.tesselate(
-			Math.sin(Date.now() / 1000) / 3 + 0.5,
+		twgl.setBuffersAndAttributes(
+			this.gl,
+			this.programInfo,
+			this.sphereMeshBufferInfo,
 		);
+
+		twgl.drawBufferInfo(this.gl, this.sphereMeshBufferInfo);
+	}
+
+	drawCloak(position: Coord2, cloakFactor: number) {
+		const model = twgl.m4.multiply(
+			twgl.m4.translation([position.x, position.y, 0, 0]),
+			twgl.m4.multiply(
+				twgl.m4.rotationY(new Date().getTime() / 1000),
+				twgl.m4.rotationX(new Date().getTime() / 1341),
+			),
+		);
+
+		twgl.setUniforms(this.programInfo, {
+			u_model: model,
+			u_diffuseMap: this.textures[
+				Object.keys(this.textures)[Object.keys(this.textures).length - 1]
+			],
+		});
+
+		const cloakMeshArrays = this.cloakMesh.tesselate(cloakFactor);
 		twgl.setAttribInfoBufferFromArray(
 			this.gl,
 			this.cloakMeshBufferInfo.attribs.position,
@@ -133,13 +156,5 @@ export class Renderer {
 		);
 
 		twgl.drawBufferInfo(this.gl, this.cloakMeshBufferInfo);
-
-		twgl.setBuffersAndAttributes(
-			this.gl,
-			this.programInfo,
-			this.sphereMeshBufferInfo,
-		);
-
-		twgl.drawBufferInfo(this.gl, this.sphereMeshBufferInfo);
 	}
 }

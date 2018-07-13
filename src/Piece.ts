@@ -1,36 +1,54 @@
 import { Coord2 } from "./Coord2";
 import { waitMs } from "./functions";
 import { Renderer } from "./Renderer";
-import { Board } from "./Board";
+
+const cloakTime = 500;
 
 export class Piece {
 	renderer: Renderer;
 	color: number;
-	colorIsVisible: boolean;
-	picked: boolean;
+	cloakFactor: number;
 	frameCoroutine: IterableIterator<void>;
 
 	constructor(options: { renderer: Renderer; color: number }) {
 		this.renderer = options.renderer;
 		this.color = options.color;
-		this.colorIsVisible = true;
-		this.picked = false;
-		this.frameCoroutine = this.makeFrameCoroutine();
+		this.cloakFactor = 0;
+		this.frameCoroutine = this.makeInitCoroutine();
 	}
 
 	setPicked(picked: boolean) {
-		this.picked = picked;
+		this.frameCoroutine = picked
+			? this.makeUnCloakCoroutine()
+			: this.makeCloakCoroutine();
 	}
 
-	*makeFrameCoroutine(): IterableIterator<void> {
+	*makeInitCoroutine(): IterableIterator<void> {
 		yield* waitMs(2000);
-		this.colorIsVisible = false;
+		yield* this.makeCloakCoroutine();
+	}
+
+	*makeCloakCoroutine(): IterableIterator<void> {
+		for (this.cloakFactor = 0; this.cloakFactor < 1; ) {
+			const frameTime = yield;
+			this.cloakFactor += frameTime / cloakTime;
+		}
+		this.cloakFactor = 1;
+	}
+
+	*makeUnCloakCoroutine(): IterableIterator<void> {
+		for (this.cloakFactor = 1; this.cloakFactor > 0; ) {
+			const frameTime = yield;
+			this.cloakFactor -= frameTime / cloakTime;
+		}
+		this.cloakFactor = 0;
 	}
 
 	draw(position: Coord2) {
-		this.renderer.drawSphere(
-			this.picked || this.colorIsVisible ? this.color : Board.numColors,
-			position,
-		);
+		this.renderer.drawSphere(this.color, position);
+
+		if (this.cloakFactor) {
+			this.renderer.drawCloak(position, this.cloakFactor);
+		}
 	}
 }
