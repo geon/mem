@@ -45,9 +45,11 @@ export class Piece {
 	}
 
 	draw(position: Coord2) {
-		this.renderer.drawSphere(this.color, position);
+		if (this.cloakFactor < 1) {
+			this.renderer.drawSphere(this.color, position);
+		}
 
-		if (this.cloakFactor) {
+		if (this.cloakFactor > 0) {
 			this.renderer.drawCloak(position, this.cloakFactor);
 		}
 	}
