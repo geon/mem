@@ -4,6 +4,7 @@ import { meshToWebglArrays, makeTesselatedSphereMesh } from "./functions";
 import { Board } from "./Board";
 import { vertexShader, fragmentShader } from "./shaders";
 import { textureInfo } from "./textures";
+import { CloakMesh } from "./CloakMesh";
 
 export class Renderer {
 	gl: WebGLRenderingContext;
@@ -12,6 +13,8 @@ export class Renderer {
 		[key: string]: WebGLTexture;
 	};
 	sphereMeshBufferInfo: twgl.BufferInfo;
+	cloakMesh: CloakMesh;
+	cloakMeshBufferInfo: twgl.BufferInfo;
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.gl = canvas.getContext("webgl")!;
@@ -26,6 +29,12 @@ export class Renderer {
 		this.sphereMeshBufferInfo = twgl.createBufferInfoFromArrays(
 			this.gl,
 			meshToWebglArrays(makeTesselatedSphereMesh(0.4, 8)),
+		);
+
+		this.cloakMesh = new CloakMesh(0.4 - 0.005, 0.05, 8);
+		this.cloakMeshBufferInfo = twgl.createBufferInfoFromArrays(
+			this.gl,
+			this.cloakMesh.tesselate(0),
 		);
 
 		twgl.resizeCanvasToDisplaySize(canvas, window.devicePixelRatio);
@@ -97,6 +106,33 @@ export class Renderer {
 				Object.keys(this.textures)[color % Object.keys(this.textures).length]
 			],
 		});
+
+		const cloakMeshArrays = this.cloakMesh.tesselate(
+			Math.sin(Date.now() / 1000) / 3 + 0.5,
+		);
+		twgl.setAttribInfoBufferFromArray(
+			this.gl,
+			this.cloakMeshBufferInfo.attribs.position,
+			cloakMeshArrays.position,
+		);
+		twgl.setAttribInfoBufferFromArray(
+			this.gl,
+			this.cloakMeshBufferInfo.attribs.normal,
+			cloakMeshArrays.normal,
+		);
+		twgl.setAttribInfoBufferFromArray(
+			this.gl,
+			this.cloakMeshBufferInfo.attribs.texCoord,
+			cloakMeshArrays.texCoord,
+		);
+
+		twgl.setBuffersAndAttributes(
+			this.gl,
+			this.programInfo,
+			this.cloakMeshBufferInfo,
+		);
+
+		twgl.drawBufferInfo(this.gl, this.cloakMeshBufferInfo);
 
 		twgl.setBuffersAndAttributes(
 			this.gl,
