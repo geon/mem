@@ -14,7 +14,8 @@ export class Renderer {
 	};
 	sphereMeshBufferInfo: twgl.BufferInfo;
 	cloakMesh: CloakMesh;
-	cloakMeshBufferInfo: twgl.BufferInfo;
+	partialCloakMeshBufferInfo: twgl.BufferInfo;
+	fullCloakMeshBufferInfo: twgl.BufferInfo;
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.gl = canvas.getContext("webgl")!;
@@ -26,15 +27,24 @@ export class Renderer {
 
 		this.programInfo = twgl.createProgramInfoFromProgram(this.gl, program);
 
+		const sphereRadius = 0.4;
 		this.sphereMeshBufferInfo = twgl.createBufferInfoFromArrays(
 			this.gl,
-			meshToWebglArrays(makeTesselatedSphereMesh(0.4, 8)),
+			meshToWebglArrays(makeTesselatedSphereMesh(sphereRadius, 8)),
 		);
 
-		this.cloakMesh = new CloakMesh(0.4 - 0.005, 0.05, 8);
-		this.cloakMeshBufferInfo = twgl.createBufferInfoFromArrays(
+		const cloakThickness = 0.05;
+		this.cloakMesh = new CloakMesh(sphereRadius, cloakThickness, 8);
+		this.partialCloakMeshBufferInfo = twgl.createBufferInfoFromArrays(
 			this.gl,
 			this.cloakMesh.tesselate(0),
+		);
+
+		this.fullCloakMeshBufferInfo = twgl.createBufferInfoFromArrays(
+			this.gl,
+			meshToWebglArrays(
+				makeTesselatedSphereMesh(sphereRadius + cloakThickness, 8),
+			),
 		);
 
 		twgl.resizeCanvasToDisplaySize(canvas, window.devicePixelRatio);
@@ -132,29 +142,41 @@ export class Renderer {
 			],
 		});
 
-		const cloakMeshArrays = this.cloakMesh.tesselate(cloakFactor);
-		twgl.setAttribInfoBufferFromArray(
-			this.gl,
-			this.cloakMeshBufferInfo.attribs.position,
-			cloakMeshArrays.position,
-		);
-		twgl.setAttribInfoBufferFromArray(
-			this.gl,
-			this.cloakMeshBufferInfo.attribs.normal,
-			cloakMeshArrays.normal,
-		);
-		twgl.setAttribInfoBufferFromArray(
-			this.gl,
-			this.cloakMeshBufferInfo.attribs.texCoord,
-			cloakMeshArrays.texCoord,
-		);
+		if (cloakFactor == 1) {
+			// Static mesh because it is faster.
+			twgl.setBuffersAndAttributes(
+				this.gl,
+				this.programInfo,
+				this.fullCloakMeshBufferInfo,
+			);
 
-		twgl.setBuffersAndAttributes(
-			this.gl,
-			this.programInfo,
-			this.cloakMeshBufferInfo,
-		);
+			twgl.drawBufferInfo(this.gl, this.fullCloakMeshBufferInfo);
+		} else {
+			// Animated mesh.
+			const cloakMeshArrays = this.cloakMesh.tesselate(cloakFactor);
+			twgl.setAttribInfoBufferFromArray(
+				this.gl,
+				this.partialCloakMeshBufferInfo.attribs.position,
+				cloakMeshArrays.position,
+			);
+			twgl.setAttribInfoBufferFromArray(
+				this.gl,
+				this.partialCloakMeshBufferInfo.attribs.normal,
+				cloakMeshArrays.normal,
+			);
+			twgl.setAttribInfoBufferFromArray(
+				this.gl,
+				this.partialCloakMeshBufferInfo.attribs.texCoord,
+				cloakMeshArrays.texCoord,
+			);
 
-		twgl.drawBufferInfo(this.gl, this.cloakMeshBufferInfo);
+			twgl.setBuffersAndAttributes(
+				this.gl,
+				this.programInfo,
+				this.partialCloakMeshBufferInfo,
+			);
+
+			twgl.drawBufferInfo(this.gl, this.partialCloakMeshBufferInfo);
+		}
 	}
 }
