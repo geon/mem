@@ -24,10 +24,9 @@ export class CloakMesh {
 		this.thickness = thickness;
 	}
 
-	tesselate(_cloakFactor: number): twgl.Arrays {
+	tesselate(cloakFactor: number): twgl.Arrays {
 		const posY = new Coord3({ x: 0, y: 1, z: 0 });
 		const negX = new Coord3({ x: -1, y: 0, z: 0 });
-		const posZ = new Coord3({ x: 0, y: 0, z: 1 });
 		const startingPoint = negX.scaled(this.innerRadius + this.thickness);
 		const rimTesselation = this.uTesselation;
 
@@ -50,7 +49,7 @@ export class CloakMesh {
 
 					const position = axisRotate(
 						negX,
-						axisRotate(posY, startingPoint, uFactor * 90),
+						axisRotate(posY, startingPoint, uFactor * 180 * cloakFactor),
 						vFactor * 360,
 					);
 
@@ -99,7 +98,7 @@ export class CloakMesh {
 		// Rim
 		{
 			const rimRadius = this.thickness / 2;
-			const rimCenter = posZ.scaled(this.innerRadius + rimRadius);
+			const rimCenter = negX.scaled(this.innerRadius + rimRadius);
 
 			const rimVertices: Array<Array<Vertex>> = [];
 			for (let v = 0; v <= this.vTesselation; ++v) {
@@ -111,16 +110,24 @@ export class CloakMesh {
 
 					const position = axisRotate(
 						negX,
-						Coord3.add(
-							axisRotate(posY, posZ.scaled(rimRadius), uFactor * 180),
-							rimCenter,
+						axisRotate(
+							posY,
+							Coord3.add(
+								axisRotate(posY, negX.scaled(rimRadius), uFactor * 180),
+								rimCenter,
+							),
+							cloakFactor * 180,
 						),
 						vFactor * 360,
 					);
 
 					const normal = axisRotate(
 						negX,
-						axisRotate(posY, posZ.scaled(rimRadius), uFactor * 180),
+						axisRotate(
+							posY,
+							negX.scaled(rimRadius),
+							uFactor * 180 + cloakFactor * 180,
+						),
 						vFactor * 360,
 					);
 
