@@ -19,16 +19,13 @@ export class CloakMesh {
 	thickness: number;
 
 	constructor(innerRadius: number, thickness: number, uTesselation: number) {
-		this.triangles = [];
 		this.uTesselation = uTesselation;
 		this.vTesselation = uTesselation * 4;
 		this.innerRadius = innerRadius;
 		this.thickness = thickness;
-
-		this.tesselate(0.5);
 	}
 
-	tesselate(_cloakFactor: number) {
+	tesselate(_cloakFactor: number): twgl.Arrays {
 		const posY = new Coord3({ x: 0, y: 1, z: 0 });
 		const negX = new Coord3({ x: -1, y: 0, z: 0 });
 		const posZ = new Coord3({ x: 0, y: 0, z: 1 });
@@ -147,6 +144,6 @@ export class CloakMesh {
 			}
 		}
 
-		this.triangles = meshToWebglArrays(triangles);
+		return meshToWebglArrays(triangles);
 	}
 }
