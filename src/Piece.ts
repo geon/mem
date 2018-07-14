@@ -19,29 +19,21 @@ export class Piece {
 
 	setPicked(picked: boolean) {
 		this.frameCoroutine = picked
-			? this.makeUnCloakCoroutine()
-			: this.makeCloakCoroutine();
+			? this.makeCloakCoroutine(1, 0)
+			: this.makeCloakCoroutine(0, 1);
 	}
 
 	*makeInitCoroutine(): IterableIterator<void> {
 		yield* waitMs(2000);
-		yield* this.makeCloakCoroutine();
+		yield* this.makeCloakCoroutine(0, 1);
 	}
 
-	*makeCloakCoroutine(): IterableIterator<void> {
-		for (this.cloakFactor = 0; this.cloakFactor < 1; ) {
+	*makeCloakCoroutine(from: number, to: number): IterableIterator<void> {
+		for (this.cloakFactor = from; (to - from) * (to - this.cloakFactor) > 0; ) {
 			const frameTime = yield;
-			this.cloakFactor += frameTime / cloakTime;
+			this.cloakFactor += (to - from) * (frameTime / cloakTime);
 		}
-		this.cloakFactor = 1;
-	}
-
-	*makeUnCloakCoroutine(): IterableIterator<void> {
-		for (this.cloakFactor = 1; this.cloakFactor > 0; ) {
-			const frameTime = yield;
-			this.cloakFactor -= frameTime / cloakTime;
-		}
-		this.cloakFactor = 0;
+		this.cloakFactor = to;
 	}
 
 	draw(position: Coord2) {
