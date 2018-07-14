@@ -42,9 +42,10 @@ export class Piece {
 		to: number,
 		duration: number,
 	): IterableIterator<void> {
-		for (this.cloakFactor = from; (to - from) * (to - this.cloakFactor) > 0; ) {
+		for (let timeFactor = 0; timeFactor < 1; ) {
 			const frameTime = yield;
-			this.cloakFactor += (to - from) * (frameTime / duration);
+			timeFactor += frameTime / duration;
+			this.cloakFactor = from * (1 - timeFactor) + to * timeFactor;
 		}
 		this.cloakFactor = to;
 	}
