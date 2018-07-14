@@ -13,6 +13,22 @@ export function* waitMs(duration: number): IterableIterator<void> {
 	return elapsedTime;
 }
 
+export function* animateInterpolation(
+	duration: number,
+	frame: (timeFactor: number) => void,
+): IterableIterator<void> {
+	let elapsedTime = 0;
+
+	while (elapsedTime < duration) {
+		frame(elapsedTime / duration);
+		const deltaTime: number = yield;
+		elapsedTime += deltaTime;
+	}
+	frame(1);
+
+	return elapsedTime;
+}
+
 export function* range(from: number, to: number): IterableIterator<number> {
 	for (let i = from; i < to; ++i) {
 		yield i;

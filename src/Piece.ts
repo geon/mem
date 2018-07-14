@@ -1,5 +1,6 @@
 import { Coord2 } from "./Coord2";
 import { Renderer } from "./Renderer";
+import { animateInterpolation } from "./functions";
 
 export class Piece {
 	renderer: Renderer;
@@ -42,12 +43,9 @@ export class Piece {
 		to: number,
 		duration: number,
 	): IterableIterator<void> {
-		for (let timeFactor = 0; timeFactor < 1; ) {
-			const frameTime = yield;
-			timeFactor += frameTime / duration;
+		yield* animateInterpolation(duration, timeFactor => {
 			this.cloakFactor = from * (1 - timeFactor) + to * timeFactor;
-		}
-		this.cloakFactor = to;
+		});
 	}
 
 	move(position: Coord2, duration: number) {
@@ -63,12 +61,9 @@ export class Piece {
 		to: Coord2,
 		duration: number,
 	): IterableIterator<void> {
-		for (let timeFactor = 0; timeFactor < 1; ) {
-			const frameTime = yield;
-			timeFactor += frameTime / duration;
+		yield* animateInterpolation(duration, timeFactor => {
 			this.position = Coord2.interpolate(from, to, timeFactor);
-		}
-		this.position = to;
+		});
 	}
 
 	draw() {
