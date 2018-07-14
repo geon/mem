@@ -50,6 +50,10 @@ export class Board {
 
 	static size = new Coord2({ x: 4, y: 4 });
 	static numColors = 13;
+	static queuePosition = Coord2.add(
+		Board.size.scaled(0.5),
+		new Coord2({ x: 0.5, y: 0.5 }),
+	);
 
 	static xyToIndex(x: number, y: number) {
 		return x + y * Board.size.x;
@@ -98,6 +102,11 @@ export class Board {
 			if (!this.pieces[index]) {
 				const piece = new Piece({
 					renderer: this.renderer,
+					position: Coord2.add(
+						Coord2.add(Board.indexToCoord(index), Board.size.scaled(-0.5)),
+						new Coord2({ x: 0.5, y: 0.5 }),
+					),
+
 					color,
 				});
 				piece.setCloaked(true, 2000);
@@ -193,6 +202,7 @@ export class Board {
 				// Queue up a new piece.
 				this.queuedPiece = new Piece({
 					renderer: this.renderer,
+					position: Board.queuePosition,
 
 					// Pick any existing color (or finding the match is impossible), but
 					// avoid queuing up the same color twice in a row, or the
@@ -230,6 +240,7 @@ export class Board {
 		// There must be a queued up piece to play.
 		this.queuedPiece = new Piece({
 			renderer: this.renderer,
+			position: Board.queuePosition,
 			color: randomElement(this.existingColors())!,
 		});
 		this.queuedPiece.setCloaked(false, 0);
@@ -238,20 +249,11 @@ export class Board {
 	draw() {
 		this.renderer.clear();
 
-		this.queuedPiece &&
-			this.queuedPiece.draw(
-				Coord2.add(Board.size.scaled(0.5), new Coord2({ x: 0.5, y: 0.5 })),
-			);
+		this.queuedPiece && this.queuedPiece.draw();
 
-		for (let i = 0; i < Board.size.x * Board.size.y; ++i) {
-			const piece = this.pieces[i];
+		for (const piece of this.pieces) {
 			if (piece) {
-				piece.draw(
-					Coord2.add(
-						Coord2.add(Board.indexToCoord(i), Board.size.scaled(-0.5)),
-						new Coord2({ x: 0.5, y: 0.5 }),
-					),
-				);
+				piece.draw();
 			}
 		}
 	}

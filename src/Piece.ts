@@ -3,12 +3,18 @@ import { Renderer } from "./Renderer";
 
 export class Piece {
 	renderer: Renderer;
+	position: Coord2;
 	color: number;
 	cloakFactor: number;
 	frameCoroutine: IterableIterator<void>;
 
-	constructor(options: { renderer: Renderer; color: number }) {
+	constructor(options: {
+		renderer: Renderer;
+		position: Coord2;
+		color: number;
+	}) {
 		this.renderer = options.renderer;
+		this.position = options.position;
 		this.color = options.color;
 		this.cloakFactor = 0;
 	}
@@ -31,13 +37,13 @@ export class Piece {
 		this.cloakFactor = to;
 	}
 
-	draw(position: Coord2) {
+	draw() {
 		if (this.cloakFactor < 1) {
-			this.renderer.drawSphere(this.color, position);
+			this.renderer.drawSphere(this.color, this.position);
 		}
 
 		if (this.cloakFactor > 0) {
-			this.renderer.drawCloak(position, this.cloakFactor);
+			this.renderer.drawCloak(this.position, this.cloakFactor);
 		}
 	}
 }
