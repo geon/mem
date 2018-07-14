@@ -2,8 +2,6 @@ import { Coord2 } from "./Coord2";
 import { waitMs } from "./functions";
 import { Renderer } from "./Renderer";
 
-const cloakTime = 500;
-
 export class Piece {
 	renderer: Renderer;
 	color: number;
@@ -17,21 +15,25 @@ export class Piece {
 		this.frameCoroutine = this.makeInitCoroutine();
 	}
 
-	setPicked(picked: boolean) {
+	setPicked(picked: boolean, duration: number = 500) {
 		this.frameCoroutine = picked
-			? this.makeCloakCoroutine(1, 0)
-			: this.makeCloakCoroutine(0, 1);
+			? this.makeCloakCoroutine(1, 0, duration)
+			: this.makeCloakCoroutine(0, 1, duration);
 	}
 
 	*makeInitCoroutine(): IterableIterator<void> {
 		yield* waitMs(2000);
-		yield* this.makeCloakCoroutine(0, 1);
+		yield* this.makeCloakCoroutine(0, 1, 500);
 	}
 
-	*makeCloakCoroutine(from: number, to: number): IterableIterator<void> {
+	*makeCloakCoroutine(
+		from: number,
+		to: number,
+		duration: number,
+	): IterableIterator<void> {
 		for (this.cloakFactor = from; (to - from) * (to - this.cloakFactor) > 0; ) {
 			const frameTime = yield;
-			this.cloakFactor += (to - from) * (frameTime / cloakTime);
+			this.cloakFactor += (to - from) * (frameTime / duration);
 		}
 		this.cloakFactor = to;
 	}

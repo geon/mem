@@ -224,6 +224,8 @@ export class Board {
 			yield* waitMs(100);
 		}
 
+		yield* waitMs(2000);
+
 		// There must be a queued up piece to play.
 		this.queuedPiece = new Piece({
 			renderer: this.renderer,
