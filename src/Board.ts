@@ -71,7 +71,7 @@ export class Board {
 
 		if (piece && !this.pickedPiece) {
 			this.pickedPiece = piece;
-			this.pickedPiece.setPicked(true);
+			this.pickedPiece.setCloaked(false);
 		}
 	}
 
@@ -206,10 +206,10 @@ export class Board {
 							// In case all colors were filtered out
 						) || this.existingColors()[0],
 				});
-				this.queuedPiece.setPicked(true);
+				this.queuedPiece.setCloaked(false);
 
 				// Reset the picked piece.
-				this.pickedPiece.setPicked(false);
+				this.pickedPiece.setCloaked(true);
 				this.pickedPiece = undefined;
 			}
 			yield;
@@ -231,7 +231,7 @@ export class Board {
 			renderer: this.renderer,
 			color: randomElement(this.existingColors())!,
 		});
-		this.queuedPiece.setPicked(true);
+		this.queuedPiece.setCloaked(false);
 	}
 
 	draw() {

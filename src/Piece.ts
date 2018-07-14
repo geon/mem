@@ -15,10 +15,10 @@ export class Piece {
 		this.frameCoroutine = this.makeInitCoroutine();
 	}
 
-	setPicked(picked: boolean, duration: number = 500) {
-		this.frameCoroutine = picked
-			? this.makeCloakCoroutine(1, 0, duration)
-			: this.makeCloakCoroutine(0, 1, duration);
+	setCloaked(cloaked: boolean, duration: number = 500) {
+		this.frameCoroutine = cloaked
+			? this.makeCloakCoroutine(this.cloakFactor, 1, duration)
+			: this.makeCloakCoroutine(this.cloakFactor, 0, duration);
 	}
 
 	*makeInitCoroutine(): IterableIterator<void> {
