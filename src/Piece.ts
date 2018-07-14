@@ -1,5 +1,4 @@
 import { Coord2 } from "./Coord2";
-import { waitMs } from "./functions";
 import { Renderer } from "./Renderer";
 
 export class Piece {
@@ -12,18 +11,12 @@ export class Piece {
 		this.renderer = options.renderer;
 		this.color = options.color;
 		this.cloakFactor = 0;
-		this.frameCoroutine = this.makeInitCoroutine();
 	}
 
 	setCloaked(cloaked: boolean, duration: number = 500) {
 		this.frameCoroutine = cloaked
 			? this.makeCloakCoroutine(this.cloakFactor, 1, duration)
 			: this.makeCloakCoroutine(this.cloakFactor, 0, duration);
-	}
-
-	*makeInitCoroutine(): IterableIterator<void> {
-		yield* waitMs(2000);
-		yield* this.makeCloakCoroutine(0, 1, 500);
 	}
 
 	*makeCloakCoroutine(

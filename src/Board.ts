@@ -96,10 +96,12 @@ export class Board {
 
 		for (const index of pieceAddOrder) {
 			if (!this.pieces[index]) {
-				this.pieces[index] = new Piece({
+				const piece = new Piece({
 					renderer: this.renderer,
 					color,
 				});
+				piece.setCloaked(true, 2000);
+				this.pieces[index] = piece;
 				return true;
 			}
 		}
@@ -205,7 +207,7 @@ export class Board {
 							// In case all colors were filtered out
 						) || this.existingColors()[0],
 				});
-				this.queuedPiece.setCloaked(false);
+				this.queuedPiece.setCloaked(false, 0);
 
 				// Reset the picked piece.
 				this.pickedPiece.setCloaked(true);
@@ -230,7 +232,7 @@ export class Board {
 			renderer: this.renderer,
 			color: randomElement(this.existingColors())!,
 		});
-		this.queuedPiece.setCloaked(false);
+		this.queuedPiece.setCloaked(false, 0);
 	}
 
 	draw() {
