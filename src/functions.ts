@@ -29,6 +29,21 @@ export function* animateInterpolation(
 	return elapsedTime;
 }
 
+// Formulas from http://www.gizma.com/easing/
+export const easings = {
+	inOutCubic: (t: number, b = 0, c = 1, d = 1) => {
+		t /= d / 2;
+		if (t < 1) return c / 2 * t * t * t + b;
+		t -= 2;
+		return c / 2 * (t * t * t + 2) + b;
+	},
+	easeOutCubic: (t: number, b = 0, c = 1, d = 1) => {
+		t /= d;
+		t--;
+		return c * (t * t * t + 1) + b;
+	},
+};
+
 export function* range(from: number, to: number): IterableIterator<number> {
 	for (let i = from; i < to; ++i) {
 		yield i;

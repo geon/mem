@@ -1,6 +1,6 @@
 import { Coord2 } from "./Coord2";
 import { Renderer } from "./Renderer";
-import { animateInterpolation } from "./functions";
+import { animateInterpolation, easings } from "./functions";
 
 export class Piece {
 	renderer: Renderer;
@@ -60,9 +60,10 @@ export class Piece {
 		from: Coord2,
 		to: Coord2,
 		duration: number,
+		easing: (t: number) => number = easings.inOutCubic,
 	): IterableIterator<void> {
 		yield* animateInterpolation(duration, timeFactor => {
-			this.position = Coord2.interpolate(from, to, timeFactor);
+			this.position = Coord2.interpolate(from, to, easing(timeFactor));
 		});
 	}
 
