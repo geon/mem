@@ -8,6 +8,7 @@ export class Piece {
 	cloakFactor: number;
 	frameCoroutine: IterableIterator<void>;
 	cloakCoroutine?: IterableIterator<void>;
+	moveCoroutine?: IterableIterator<void>;
 
 	constructor(options: {
 		renderer: Renderer;
@@ -26,6 +27,7 @@ export class Piece {
 		for (;;) {
 			const frameTime = yield;
 			this.cloakCoroutine && this.cloakCoroutine.next(frameTime);
+			this.moveCoroutine && this.moveCoroutine.next(frameTime);
 		}
 	}
 
@@ -45,6 +47,27 @@ export class Piece {
 			this.cloakFactor += (to - from) * (frameTime / duration);
 		}
 		this.cloakFactor = to;
+	}
+
+	move(position: Coord2, duration: number) {
+		this.moveCoroutine = this.makeMoveCoroutine(
+			this.position,
+			position,
+			duration,
+		);
+	}
+
+	*makeMoveCoroutine(
+		from: Coord2,
+		to: Coord2,
+		duration: number,
+	): IterableIterator<void> {
+		for (let timeFactor = 0; timeFactor < 1; ) {
+			const frameTime = yield;
+			timeFactor += frameTime / duration;
+			this.position = Coord2.interpolate(from, to, timeFactor);
+		}
+		this.position = to;
 	}
 
 	draw() {

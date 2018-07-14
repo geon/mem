@@ -54,6 +54,7 @@ export class Board {
 		Board.size.scaled(0.5),
 		new Coord2({ x: 0.5, y: 0.5 }),
 	);
+	static spawnPosition = Board.size;
 
 	static xyToIndex(x: number, y: number) {
 		return x + y * Board.size.x;
@@ -79,7 +80,7 @@ export class Board {
 		}
 	}
 
-	addPiece(color: number) {
+	addPiece(piece: Piece) {
 		const pieceAddOrder = Array.from(
 			range(0, Board.size.x * Board.size.y),
 		).sort((a, b) => {
@@ -100,15 +101,11 @@ export class Board {
 
 		for (const index of pieceAddOrder) {
 			if (!this.pieces[index]) {
-				const piece = new Piece({
-					renderer: this.renderer,
-					position: Coord2.add(
-						Coord2.add(Board.indexToCoord(index), Board.size.scaled(-0.5)),
-						new Coord2({ x: 0.5, y: 0.5 }),
-					),
-
-					color,
-				});
+				const newPosition = Coord2.add(
+					Coord2.add(Board.indexToCoord(index), Board.size.scaled(-0.5)),
+					new Coord2({ x: 0.5, y: 0.5 }),
+				);
+				piece.move(newPosition, 1000);
 				piece.setCloaked(true, 2000);
 				this.pieces[index] = piece;
 				return true;
@@ -186,7 +183,7 @@ export class Board {
 					}
 				} else {
 					// Punish player.
-					const addedPieceSuccessfully = this.addPiece(this.queuedPiece!.color);
+					const addedPieceSuccessfully = this.addPiece(this.queuedPiece);
 
 					// Detect game over.
 					if (!addedPieceSuccessfully) {
@@ -202,7 +199,7 @@ export class Board {
 				// Queue up a new piece.
 				this.queuedPiece = new Piece({
 					renderer: this.renderer,
-					position: Board.queuePosition,
+					position: Board.spawnPosition,
 
 					// Pick any existing color (or finding the match is impossible), but
 					// avoid queuing up the same color twice in a row, or the
@@ -217,6 +214,7 @@ export class Board {
 							// In case all colors were filtered out
 						) || this.existingColors()[0],
 				});
+				this.queuedPiece.move(Board.queuePosition, 500);
 				this.queuedPiece.setCloaked(false, 0);
 
 				// Reset the picked piece.
@@ -231,7 +229,13 @@ export class Board {
 		// Add initial pieces.
 		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; ++i) {
 			const color = randomElement(this.allColors())!;
-			this.addPiece(color);
+			this.addPiece(
+				new Piece({
+					renderer: this.renderer,
+					position: Board.spawnPosition,
+					color,
+				}),
+			);
 			yield* waitMs(100);
 		}
 
