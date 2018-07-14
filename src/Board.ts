@@ -98,7 +98,6 @@ export class Board {
 			if (!this.pieces[index]) {
 				this.pieces[index] = new Piece({
 					renderer: this.renderer,
-
 					color,
 				});
 				return true;
