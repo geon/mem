@@ -7,6 +7,7 @@ export class Piece {
 	color: number;
 	cloakFactor: number;
 	frameCoroutine: IterableIterator<void>;
+	cloakCoroutine?: IterableIterator<void>;
 
 	constructor(options: {
 		renderer: Renderer;
@@ -17,10 +18,19 @@ export class Piece {
 		this.position = options.position;
 		this.color = options.color;
 		this.cloakFactor = 0;
+
+		this.frameCoroutine = this.makeFrameCoroutine();
+	}
+
+	*makeFrameCoroutine(): IterableIterator<void> {
+		for (;;) {
+			const frameTime = yield;
+			this.cloakCoroutine && this.cloakCoroutine.next(frameTime);
+		}
 	}
 
 	setCloaked(cloaked: boolean, duration: number = 500) {
-		this.frameCoroutine = cloaked
+		this.cloakCoroutine = cloaked
 			? this.makeCloakCoroutine(this.cloakFactor, 1, duration)
 			: this.makeCloakCoroutine(this.cloakFactor, 0, duration);
 	}
