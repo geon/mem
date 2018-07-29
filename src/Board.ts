@@ -215,7 +215,6 @@ export class Board {
 						) || this.existingColors()[0],
 				});
 				this.queuedPiece.move(Board.queuePosition, 500);
-				this.queuedPiece.setCloaked(false, 0);
 
 				// Reset the picked piece.
 				this.pickedPiece.setCloaked(true);
@@ -247,7 +246,6 @@ export class Board {
 			position: Board.queuePosition,
 			color: randomElement(this.existingColors())!,
 		});
-		this.queuedPiece.setCloaked(false, 0);
 	}
 
 	draw() {
