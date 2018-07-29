@@ -60,19 +60,18 @@ export class Renderer {
 		const aspect = this.gl.canvas.clientWidth / this.gl.canvas.clientHeight;
 		const boardWidth = Board.size.x + 2;
 		const boardHeight = Board.size.y + 2;
-		const halfVisibleWidth = Math.max(boardWidth, boardWidth * aspect) / 2;
-		const halfVisibleHeight = Math.max(boardHeight, boardHeight / aspect) / 2;
+		const halfVisibleWidth = Math.max(boardWidth, boardHeight / aspect) / 2;
 		const zNear = 0.5;
 		const zFar = 30;
-		const projection = twgl.m4.ortho(
-			-halfVisibleWidth,
-			halfVisibleWidth,
-			-halfVisibleHeight,
-			halfVisibleHeight,
-			zNear,
-			zFar,
-		);
-		const eye = [1, 4, 12];
+
+		const boardFov = Math.PI / 180 * 20;
+		const cameraDistance =
+			Math.max(boardWidth, boardHeight) / 2 / Math.tan(boardFov / 2);
+
+		const fov = Math.atan(halfVisibleWidth / cameraDistance) * 2;
+		const projection = twgl.m4.perspective(fov, aspect, zNear, zFar);
+
+		const eye = [0, 0, cameraDistance];
 		const target = [0, 0, 0];
 		const up = [0, 1, 0];
 
