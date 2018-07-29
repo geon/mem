@@ -8,8 +8,7 @@ export class Piece {
 	color: number;
 	cloakFactor: number;
 	frameCoroutine: IterableIterator<void>;
-	cloakCoroutine?: IterableIterator<void>;
-	moveCoroutine?: IterableIterator<void>;
+	animationQueue: Array<IterableIterator<void>>;
 
 	constructor(options: {
 		renderer: Renderer;
@@ -22,18 +21,27 @@ export class Piece {
 		this.cloakFactor = 0;
 
 		this.frameCoroutine = this.makeFrameCoroutine();
+		this.animationQueue = [];
 	}
 
 	*makeFrameCoroutine(): IterableIterator<void> {
 		for (;;) {
-			const frameTime = yield;
-			this.cloakCoroutine && this.cloakCoroutine.next(frameTime);
-			this.moveCoroutine && this.moveCoroutine.next(frameTime);
+			const animationCoroutine = this.animationQueue.shift();
+			if (!animationCoroutine) {
+				yield;
+				continue;
+			}
+
+			let done = false;
+			while (!done) {
+				const frameTime = yield;
+				done = animationCoroutine.next(frameTime).done;
+			}
 		}
 	}
 
 	setCloaked(cloaked: boolean, duration?: number) {
-		this.cloakCoroutine = this.makeCloakCoroutine(cloaked, duration);
+		this.animationQueue.push(this.makeCloakCoroutine(cloaked, duration));
 	}
 
 	*makeCloakCoroutine(
@@ -49,7 +57,7 @@ export class Piece {
 	}
 
 	move(position: Coord2, duration: number) {
-		this.moveCoroutine = this.makeMoveCoroutine(position, duration);
+		this.animationQueue.push(this.makeMoveCoroutine(position, duration));
 	}
 
 	*makeMoveCoroutine(
