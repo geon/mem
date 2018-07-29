@@ -161,8 +161,7 @@ export class Board {
 			if (this.pickedPiece && this.queuedPiece) {
 				// Give the player a chance to compare the pieces visually.
 				this.queuedPiece.cancelAnimations();
-				this.queuedPiece.setCloaked(false);
-				yield* waitMs(1000);
+				yield* this.queuedPiece.makeCloakCoroutine(false);
 
 				if (this.pickedPiece.color == this.queuedPiece.color) {
 					// The player found a pair.
