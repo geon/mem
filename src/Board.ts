@@ -77,6 +77,15 @@ export class Board {
 		});
 	}
 
+	static pieceHomePosition(index: number) {
+		return Coord3.fromCoord2(
+			Coord2.add(
+				Coord2.add(Board.indexToCoord(index), Board.size.scaled(-0.5)),
+				new Coord2({ x: 0.5, y: 0.5 }),
+			),
+		);
+	}
+
 	pick(index: number) {
 		const piece = this.pieces[index];
 
@@ -195,12 +204,7 @@ export class Board {
 						return;
 					}
 
-					const newPosition = Coord3.fromCoord2(
-						Coord2.add(
-							Coord2.add(Board.indexToCoord(index), Board.size.scaled(-0.5)),
-							new Coord2({ x: 0.5, y: 0.5 }),
-						),
-					);
+					const newPosition = Board.pieceHomePosition(index);
 					yield* this.queuedPiece.makeMoveCoroutine(newPosition, 500);
 					yield* this.queuedPiece.makeCloakCoroutine(true, 1000);
 					this.pieces[index] = this.queuedPiece;
