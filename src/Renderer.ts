@@ -1,4 +1,4 @@
-import { Coord2 } from "./Coord2";
+import { Coord3 } from "./Coord3";
 import * as twgl from "twgl.js";
 import { meshToWebglArrays, makeTesselatedSphereMesh } from "./functions";
 import { Board } from "./Board";
@@ -100,9 +100,9 @@ export class Renderer {
 		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 	}
 
-	drawSphere(color: number, position: Coord2) {
+	drawSphere(color: number, position: Coord3) {
 		const model = twgl.m4.multiply(
-			twgl.m4.translation([position.x, position.y, 0, 0]),
+			twgl.m4.translation([position.x, position.y, position.z, 0]),
 			twgl.m4.multiply(
 				twgl.m4.rotationY(new Date().getTime() / 1000),
 				twgl.m4.rotationX(new Date().getTime() / 1341),
@@ -125,9 +125,9 @@ export class Renderer {
 		twgl.drawBufferInfo(this.gl, this.sphereMeshBufferInfo);
 	}
 
-	drawCloak(position: Coord2, cloakFactor: number) {
+	drawCloak(position: Coord3, cloakFactor: number) {
 		const model = twgl.m4.multiply(
-			twgl.m4.translation([position.x, position.y, 0, 0]),
+			twgl.m4.translation([position.x, position.y, position.z, 0]),
 			twgl.m4.multiply(
 				twgl.m4.rotationY(new Date().getTime() / 1000),
 				twgl.m4.rotationX(new Date().getTime() / 1341),

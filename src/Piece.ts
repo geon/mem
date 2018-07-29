@@ -1,10 +1,10 @@
-import { Coord2 } from "./Coord2";
+import { Coord3 } from "./Coord3";
 import { Renderer } from "./Renderer";
 import { animateInterpolation, easings, waitMs } from "./functions";
 
 export class Piece {
 	renderer: Renderer;
-	position: Coord2;
+	position: Coord3;
 	color: number;
 	cloakFactor: number;
 	frameCoroutine: IterableIterator<void>;
@@ -12,7 +12,7 @@ export class Piece {
 
 	constructor(options: {
 		renderer: Renderer;
-		position: Coord2;
+		position: Coord3;
 		color: number;
 	}) {
 		this.renderer = options.renderer;
@@ -61,12 +61,12 @@ export class Piece {
 		});
 	}
 
-	move(position: Coord2, duration: number) {
+	move(position: Coord3, duration: number) {
 		this.animationQueue.push(this.makeMoveCoroutine(position, duration));
 	}
 
 	*makeMoveCoroutine(
-		position: Coord2,
+		position: Coord3,
 		duration: number,
 		easing: (t: number) => number = easings.inOutCubic,
 	): IterableIterator<void> {
@@ -74,7 +74,7 @@ export class Piece {
 		const to = position;
 
 		yield* animateInterpolation(duration, timeFactor => {
-			this.position = Coord2.interpolate(from, to, easing(timeFactor));
+			this.position = Coord3.interpolate(from, to, easing(timeFactor));
 		});
 	}
 

@@ -1,4 +1,5 @@
 import { Coord2 } from "./Coord2";
+import { Coord3 } from "./Coord3";
 import { GameMode } from "./GameMode";
 import { Piece } from "./Piece";
 import { waitMs, range, randomElement } from "./functions";
@@ -50,12 +51,11 @@ export class Board {
 
 	static size = new Coord2({ x: 4, y: 4 });
 	static numColors = 13;
-	static queuePosition = Coord2.add(
-		Board.size.scaled(0.5),
-		new Coord2({ x: 0.5, y: 0.5 }),
+	static queuePosition = Coord3.fromCoord2(
+		Coord2.add(Board.size.scaled(0.5), new Coord2({ x: 0.5, y: 0.5 })),
 	);
 
-	static spawnPosition(position: Coord2) {
+	static spawnPosition(position: Coord3) {
 		return position
 			.normalized()
 			.scaled(1.5 * Math.max(Board.size.x, Board.size.y));
@@ -194,9 +194,11 @@ export class Board {
 						return;
 					}
 
-					const newPosition = Coord2.add(
-						Coord2.add(Board.indexToCoord(index), Board.size.scaled(-0.5)),
-						new Coord2({ x: 0.5, y: 0.5 }),
+					const newPosition = Coord3.fromCoord2(
+						Coord2.add(
+							Coord2.add(Board.indexToCoord(index), Board.size.scaled(-0.5)),
+							new Coord2({ x: 0.5, y: 0.5 }),
+						),
 					);
 					yield* this.queuedPiece.makeMoveCoroutine(newPosition, 500);
 					yield* this.queuedPiece.makeCloakCoroutine(true, 1000);
@@ -238,9 +240,11 @@ export class Board {
 		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; ++i) {
 			const color = randomElement(this.allColors())!;
 			const index = this.getFreePieceIndex() || 0;
-			const newPosition = Coord2.add(
-				Coord2.add(Board.indexToCoord(index), Board.size.scaled(-0.5)),
-				new Coord2({ x: 0.5, y: 0.5 }),
+			const newPosition = Coord3.fromCoord2(
+				Coord2.add(
+					Coord2.add(Board.indexToCoord(index), Board.size.scaled(-0.5)),
+					new Coord2({ x: 0.5, y: 0.5 }),
+				),
 			);
 
 			const piece = new Piece({

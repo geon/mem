@@ -1,3 +1,5 @@
+import { Coord2 } from "./Coord2";
+
 export class Coord3 {
 	x: number;
 	y: number;
@@ -7,6 +9,10 @@ export class Coord3 {
 		this.x = coord.x;
 		this.y = coord.y;
 		this.z = coord.z;
+	}
+
+	static fromCoord2(a: Coord2) {
+		return new Coord3({ x: a.x, y: a.y, z: 0 });
 	}
 
 	scaled(factor: number) {
@@ -47,5 +53,9 @@ export class Coord3 {
 			y: coord.y * factor,
 			z: coord.z * factor,
 		});
+	}
+
+	static interpolate(from: Coord3, to: Coord3, factor: number) {
+		return Coord3.add(Coord3.scale(from, 1 - factor), Coord3.scale(to, factor));
 	}
 }
