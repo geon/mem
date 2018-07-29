@@ -168,8 +168,27 @@ export class Board {
 			// Wait for the player to pick a piece.
 			if (this.pickedPiece && this.queuedPiece) {
 				// Give the player a chance to compare the pieces visually.
+				const pickedPieceOldPosition = this.pickedPiece.position;
 				this.queuedPiece.cancelAnimations();
-				yield* this.queuedPiece.makeCloakCoroutine(false);
+				yield* parallel([
+					this.pickedPiece.makeCloakCoroutine(false),
+					this.queuedPiece.makeCloakCoroutine(false),
+				]);
+				yield* parallel([
+					this.queuedPiece.makeMoveCoroutine(
+						new Coord3({ x: 0.5, y: 0, z: this.renderer.cameraDistance / 2 }),
+						500,
+					),
+					this.pickedPiece.makeMoveCoroutine(
+						new Coord3({
+							x: -0.5,
+							y: 0,
+							z: this.renderer.cameraDistance / 2,
+						}),
+						500,
+					),
+				]);
+				yield* waitMs(500);
 
 				if (this.pickedPiece.color == this.queuedPiece.color) {
 					// The player found a pair.
@@ -209,6 +228,8 @@ export class Board {
 					yield* parallel([
 						this.queuedPiece.makeMoveCoroutine(newPosition, 500),
 						this.queuedPiece.makeCloakCoroutine(true, 500),
+						this.pickedPiece.makeMoveCoroutine(pickedPieceOldPosition, 500),
+						this.pickedPiece.makeCloakCoroutine(true, 500),
 					]);
 					this.pieces[index] = this.queuedPiece;
 				}
