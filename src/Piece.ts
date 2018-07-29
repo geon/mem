@@ -1,6 +1,6 @@
 import { Coord2 } from "./Coord2";
 import { Renderer } from "./Renderer";
-import { animateInterpolation, easings } from "./functions";
+import { animateInterpolation, easings, waitMs } from "./functions";
 
 export class Piece {
 	renderer: Renderer;
@@ -76,6 +76,10 @@ export class Piece {
 		yield* animateInterpolation(duration, timeFactor => {
 			this.position = Coord2.interpolate(from, to, easing(timeFactor));
 		});
+	}
+
+	wait(duration: number) {
+		this.animationQueue.push(waitMs(duration));
 	}
 
 	draw() {

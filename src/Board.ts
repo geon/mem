@@ -244,6 +244,7 @@ export class Board {
 				color,
 			});
 			piece.move(newPosition, 1000);
+			piece.wait(1000);
 			piece.setCloaked(true, 2000);
 			this.pieces[index] = piece;
 
