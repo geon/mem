@@ -33,35 +33,33 @@ export class Piece {
 	}
 
 	setCloaked(cloaked: boolean, duration?: number) {
-		this.cloakCoroutine = cloaked
-			? this.makeCloakCoroutine(this.cloakFactor, 1, duration)
-			: this.makeCloakCoroutine(this.cloakFactor, 0, duration);
+		this.cloakCoroutine = this.makeCloakCoroutine(cloaked, duration);
 	}
 
 	*makeCloakCoroutine(
-		from: number,
-		to: number,
+		cloaked: boolean,
 		duration: number = 500,
 	): IterableIterator<void> {
+		const from = this.cloakFactor;
+		const to = cloaked ? 1 : 0;
+
 		yield* animateInterpolation(duration, timeFactor => {
 			this.cloakFactor = from * (1 - timeFactor) + to * timeFactor;
 		});
 	}
 
 	move(position: Coord2, duration: number) {
-		this.moveCoroutine = this.makeMoveCoroutine(
-			this.position,
-			position,
-			duration,
-		);
+		this.moveCoroutine = this.makeMoveCoroutine(position, duration);
 	}
 
 	*makeMoveCoroutine(
-		from: Coord2,
-		to: Coord2,
+		position: Coord2,
 		duration: number,
 		easing: (t: number) => number = easings.inOutCubic,
 	): IterableIterator<void> {
+		const from = this.position;
+		const to = position;
+
 		yield* animateInterpolation(duration, timeFactor => {
 			this.position = Coord2.interpolate(from, to, easing(timeFactor));
 		});
