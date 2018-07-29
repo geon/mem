@@ -32,7 +32,7 @@ export class Piece {
 		}
 	}
 
-	setCloaked(cloaked: boolean, duration: number = 500) {
+	setCloaked(cloaked: boolean, duration?: number) {
 		this.cloakCoroutine = cloaked
 			? this.makeCloakCoroutine(this.cloakFactor, 1, duration)
 			: this.makeCloakCoroutine(this.cloakFactor, 0, duration);
@@ -41,7 +41,7 @@ export class Piece {
 	*makeCloakCoroutine(
 		from: number,
 		to: number,
-		duration: number,
+		duration: number = 500,
 	): IterableIterator<void> {
 		yield* animateInterpolation(duration, timeFactor => {
 			this.cloakFactor = from * (1 - timeFactor) + to * timeFactor;
