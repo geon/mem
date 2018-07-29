@@ -305,9 +305,11 @@ export class Board {
 		// There must be a queued up piece to play.
 		this.queuedPiece = new Piece({
 			renderer: this.renderer,
-			position: Board.queuePosition,
+			position: this.spawnPosition(Board.queuePosition),
 			color: randomElement(this.existingColors())!,
 		});
+		yield* this.queuedPiece.makeMoveCoroutine(Board.queuePosition, 500);
+
 		// Slowly cloak it.
 		this.queuedPiece.setCloaked(true, 10000);
 	}
