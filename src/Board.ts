@@ -80,7 +80,7 @@ export class Board {
 		}
 	}
 
-	addPiece(piece: Piece) {
+	*addPiece(piece: Piece) {
 		const pieceAddOrder = Array.from(
 			range(0, Board.size.x * Board.size.y),
 		).sort((a, b) => {
@@ -183,7 +183,7 @@ export class Board {
 					}
 				} else {
 					// Punish player.
-					const addedPieceSuccessfully = this.addPiece(this.queuedPiece);
+					const addedPieceSuccessfully = yield* this.addPiece(this.queuedPiece);
 
 					// Detect game over.
 					if (!addedPieceSuccessfully) {
@@ -229,7 +229,7 @@ export class Board {
 		// Add initial pieces.
 		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; ++i) {
 			const color = randomElement(this.allColors())!;
-			this.addPiece(
+			yield* this.addPiece(
 				new Piece({
 					renderer: this.renderer,
 					position: Board.spawnPosition,
