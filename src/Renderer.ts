@@ -16,6 +16,7 @@ export class Renderer {
 	cloakMesh: CloakMesh;
 	partialCloakMeshBufferInfo: twgl.BufferInfo;
 	fullCloakMeshBufferInfo: twgl.BufferInfo;
+	cameraDistance: number;
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.gl = canvas.getContext("webgl")!;
@@ -65,13 +66,13 @@ export class Renderer {
 		const zFar = 30;
 
 		const boardFov = Math.PI / 180 * 20;
-		const cameraDistance =
+		this.cameraDistance =
 			Math.max(boardWidth, boardHeight) / 2 / Math.tan(boardFov / 2);
 
-		const fov = Math.atan(halfVisibleWidth / cameraDistance) * 2;
+		const fov = Math.atan(halfVisibleWidth / this.cameraDistance) * 2;
 		const projection = twgl.m4.perspective(fov, aspect, zNear, zFar);
 
-		const eye = [0, 0, cameraDistance];
+		const eye = [0, 0, this.cameraDistance];
 		const target = [0, 0, 0];
 		const up = [0, 1, 0];
 
