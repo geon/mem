@@ -29,6 +29,21 @@ export function* animateInterpolation(
 	return elapsedTime;
 }
 
+export function* parallel(
+	branches: ReadonlyArray<IterableIterator<void>>,
+): IterableIterator<void> {
+	let incompleteBranches = branches.slice();
+	while (incompleteBranches.length) {
+		const deltaTime: number = yield;
+
+		for (let i = 0; i < incompleteBranches.length; ++i) {
+			if (incompleteBranches[i].next(deltaTime).done) {
+				incompleteBranches.splice(i, 1);
+			}
+		}
+	}
+}
+
 // Formulas from http://www.gizma.com/easing/
 export const easings = {
 	inOutCubic: (t: number, b = 0, c = 1, d = 1) => {

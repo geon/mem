@@ -2,7 +2,7 @@ import { Coord2 } from "./Coord2";
 import { Coord3 } from "./Coord3";
 import { GameMode } from "./GameMode";
 import { Piece } from "./Piece";
-import { waitMs, range, randomElement } from "./functions";
+import { waitMs, range, randomElement, parallel } from "./functions";
 import { Renderer } from "./Renderer";
 
 export class Board {
@@ -205,8 +205,11 @@ export class Board {
 					}
 
 					const newPosition = Board.pieceHomePosition(index);
-					yield* this.queuedPiece.makeMoveCoroutine(newPosition, 500);
-					yield* this.queuedPiece.makeCloakCoroutine(true, 1000);
+
+					yield* parallel([
+						this.queuedPiece.makeMoveCoroutine(newPosition, 500),
+						this.queuedPiece.makeCloakCoroutine(true, 500),
+					]);
 					this.pieces[index] = this.queuedPiece;
 				}
 
