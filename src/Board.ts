@@ -160,6 +160,8 @@ export class Board {
 			// Wait for the player to pick a piece.
 			if (this.pickedPiece && this.queuedPiece) {
 				// Give the player a chance to compare the pieces visually.
+				this.queuedPiece.cancelAnimations();
+				this.queuedPiece.setCloaked(false);
 				yield* waitMs(1000);
 
 				if (this.pickedPiece.color == this.queuedPiece.color) {
@@ -215,6 +217,8 @@ export class Board {
 						) || this.existingColors()[0],
 				});
 				this.queuedPiece.move(Board.queuePosition, 500);
+				// Slowly cloak it.
+				this.queuedPiece.setCloaked(true, 10000);
 
 				// Reset the picked piece.
 				this.pickedPiece.setCloaked(true);
@@ -246,6 +250,8 @@ export class Board {
 			position: Board.queuePosition,
 			color: randomElement(this.existingColors())!,
 		});
+		// Slowly cloak it.
+		this.queuedPiece.setCloaked(true, 10000);
 	}
 
 	draw() {

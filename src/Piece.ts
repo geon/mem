@@ -20,8 +20,13 @@ export class Piece {
 		this.color = options.color;
 		this.cloakFactor = 0;
 
-		this.frameCoroutine = this.makeFrameCoroutine();
 		this.animationQueue = [];
+		this.frameCoroutine = this.makeFrameCoroutine();
+	}
+
+	cancelAnimations() {
+		this.animationQueue = [];
+		this.frameCoroutine = this.makeFrameCoroutine();
 	}
 
 	*makeFrameCoroutine(): IterableIterator<void> {
