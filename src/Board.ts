@@ -54,7 +54,12 @@ export class Board {
 		Board.size.scaled(0.5),
 		new Coord2({ x: 0.5, y: 0.5 }),
 	);
-	static spawnPosition = Board.size;
+
+	static spawnPosition(position: Coord2) {
+		return position
+			.normalized()
+			.scaled(1.5 * Math.max(Board.size.x, Board.size.y));
+	}
 
 	static xyToIndex(x: number, y: number) {
 		return x + y * Board.size.x;
@@ -201,7 +206,7 @@ export class Board {
 				// Queue up a new piece.
 				this.queuedPiece = new Piece({
 					renderer: this.renderer,
-					position: Board.spawnPosition,
+					position: Board.spawnPosition(Board.queuePosition),
 
 					// Pick any existing color (or finding the match is impossible), but
 					// avoid queuing up the same color twice in a row, or the
@@ -240,7 +245,7 @@ export class Board {
 
 			const piece = new Piece({
 				renderer: this.renderer,
-				position: Board.spawnPosition,
+				position: Board.spawnPosition(newPosition),
 				color,
 			});
 			piece.move(newPosition, 1000);
