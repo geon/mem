@@ -80,7 +80,7 @@ export class Board {
 		}
 	}
 
-	*addPiece(piece: Piece) {
+	getFreePieceIndex() {
 		const pieceAddOrder = Array.from(
 			range(0, Board.size.x * Board.size.y),
 		).sort((a, b) => {
@@ -101,18 +101,11 @@ export class Board {
 
 		for (const index of pieceAddOrder) {
 			if (!this.pieces[index]) {
-				const newPosition = Coord2.add(
-					Coord2.add(Board.indexToCoord(index), Board.size.scaled(-0.5)),
-					new Coord2({ x: 0.5, y: 0.5 }),
-				);
-				piece.move(newPosition, 1000);
-				piece.setCloaked(true, 2000);
-				this.pieces[index] = piece;
-				return true;
+				return index;
 			}
 		}
 
-		return false;
+		return undefined;
 	}
 
 	existingColors() {
@@ -184,10 +177,10 @@ export class Board {
 					}
 				} else {
 					// Punish player.
-					const addedPieceSuccessfully = yield* this.addPiece(this.queuedPiece);
 
+					const index = this.getFreePieceIndex();
 					// Detect game over.
-					if (!addedPieceSuccessfully) {
+					if (index === undefined) {
 						this.gameMode.onGameOver(this);
 
 						// TODO: Clear board animation.
@@ -195,6 +188,14 @@ export class Board {
 						// TODO: Move the notifying of losing to the return value?
 						return;
 					}
+
+					const newPosition = Coord2.add(
+						Coord2.add(Board.indexToCoord(index), Board.size.scaled(-0.5)),
+						new Coord2({ x: 0.5, y: 0.5 }),
+					);
+					yield* this.queuedPiece.makeMoveCoroutine(newPosition, 500);
+					yield* this.queuedPiece.makeCloakCoroutine(true, 1000);
+					this.pieces[index] = this.queuedPiece;
 				}
 
 				// Queue up a new piece.
@@ -231,13 +232,21 @@ export class Board {
 		// Add initial pieces.
 		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; ++i) {
 			const color = randomElement(this.allColors())!;
-			yield* this.addPiece(
-				new Piece({
-					renderer: this.renderer,
-					position: Board.spawnPosition,
-					color,
-				}),
+			const index = this.getFreePieceIndex() || 0;
+			const newPosition = Coord2.add(
+				Coord2.add(Board.indexToCoord(index), Board.size.scaled(-0.5)),
+				new Coord2({ x: 0.5, y: 0.5 }),
 			);
+
+			const piece = new Piece({
+				renderer: this.renderer,
+				position: Board.spawnPosition,
+				color,
+			});
+			piece.move(newPosition, 1000);
+			piece.setCloaked(true, 2000);
+			this.pieces[index] = piece;
+
 			yield* waitMs(100);
 		}
 
