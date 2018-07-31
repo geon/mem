@@ -316,6 +316,7 @@ export class Board {
 		});
 		yield* this.queuedPiece.makeMoveCoroutine(Board.queuePosition, 500);
 
+		// TODO: This is broken. `this.queuedPiece` is not getting cloaked.
 		// Slowly cloak it.
 		// TODO: Having this in the piece itself smells bad.
 		this.queuedPiece.setCloaked(true, 10000);
