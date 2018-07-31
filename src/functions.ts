@@ -44,6 +44,12 @@ export function* parallel(
 	}
 }
 
+export function* queue(steps:ReadonlyArray<IterableIterator<void>>): IterableIterator<void> {
+	for (const step of steps) {
+		yield *step;
+	}
+}
+
 // Formulas from http://www.gizma.com/easing/
 export const easings = {
 	inOutCubic: (t: number, b = 0, c = 1, d = 1) => {

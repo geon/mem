@@ -1,6 +1,6 @@
 import { Coord3 } from "./Coord3";
 import { Renderer } from "./Renderer";
-import { animateInterpolation, easings, waitMs } from "./functions";
+import { animateInterpolation, easings, waitMs, queue } from "./functions";
 
 export class Piece {
 	renderer: Renderer;
@@ -8,7 +8,7 @@ export class Piece {
 	color: number;
 	cloakFactor: number;
 	frameCoroutine: IterableIterator<void>;
-	animationQueue: Array<IterableIterator<void>>;
+	animationCoroutine?: IterableIterator<void>;
 
 	constructor(options: {
 		renderer: Renderer;
@@ -19,34 +19,28 @@ export class Piece {
 		this.position = options.position;
 		this.color = options.color;
 		this.cloakFactor = 0;
-
-		this.animationQueue = [];
 		this.frameCoroutine = this.makeFrameCoroutine();
 	}
 
 	cancelAnimations() {
-		this.animationQueue = [];
+		this.animationCoroutine = undefined;
 		this.frameCoroutine = this.makeFrameCoroutine();
 	}
 
-	*makeFrameCoroutine(): IterableIterator<void> {
-		for (;;) {
-			const animationCoroutine = this.animationQueue.shift();
-			if (!animationCoroutine) {
-				yield;
-				continue;
-			}
+	queueUpAnimation(newPart: IterableIterator<void>) {
+		this.animationCoroutine = this.animationCoroutine
+			? queue([this.animationCoroutine, newPart])
+			: queue([newPart]);
+	}
 
-			let done = false;
-			while (!done) {
-				const frameTime = yield;
-				done = animationCoroutine.next(frameTime).done;
-			}
+	*makeFrameCoroutine(): IterableIterator<void> {
+		if (this.animationCoroutine) {
+			yield* this.animationCoroutine;
 		}
 	}
 
 	setCloaked(cloaked: boolean, duration?: number) {
-		this.animationQueue.push(this.makeCloakCoroutine(cloaked, duration));
+		this.queueUpAnimation(this.makeCloakCoroutine(cloaked, duration));
 	}
 
 	*makeCloakCoroutine(
@@ -62,7 +56,7 @@ export class Piece {
 	}
 
 	move(position: Coord3, duration: number) {
-		this.animationQueue.push(this.makeMoveCoroutine(position, duration));
+		this.queueUpAnimation(this.makeMoveCoroutine(position, duration));
 	}
 
 	*makeMoveCoroutine(
@@ -79,7 +73,7 @@ export class Piece {
 	}
 
 	wait(duration: number) {
-		this.animationQueue.push(waitMs(duration));
+		this.queueUpAnimation(waitMs(duration));
 	}
 
 	draw() {
