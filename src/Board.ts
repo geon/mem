@@ -91,7 +91,6 @@ export class Board {
 
 		if (piece && !this.pickedPiece) {
 			this.pickedPiece = piece;
-			this.pickedPiece.setCloaked(false);
 		}
 	}
 
