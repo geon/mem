@@ -1,6 +1,6 @@
 import { Coord3 } from "./Coord3";
 import { Renderer } from "./Renderer";
-import { animateInterpolation, easings, waitMs, queue } from "./functions";
+import { animateInterpolation, easings, queue } from "./functions";
 
 export class Piece {
 	renderer: Renderer;
@@ -39,6 +39,7 @@ export class Piece {
 		}
 	}
 
+	// TODO: Remove. Running animation from here makes it disconncted from the rest of the code. Hacky.
 	setCloaked(cloaked: boolean, duration?: number) {
 		this.queueUpAnimation(this.makeCloakCoroutine(cloaked, duration));
 	}
@@ -55,10 +56,6 @@ export class Piece {
 		});
 	}
 
-	move(position: Coord3, duration: number) {
-		this.queueUpAnimation(this.makeMoveCoroutine(position, duration));
-	}
-
 	*makeMoveCoroutine(
 		position: Coord3,
 		duration: number,
@@ -70,10 +67,6 @@ export class Piece {
 		yield* animateInterpolation(duration, timeFactor => {
 			this.position = Coord3.interpolate(from, to, easing(timeFactor));
 		});
-	}
-
-	wait(duration: number) {
-		this.queueUpAnimation(waitMs(duration));
 	}
 
 	draw() {

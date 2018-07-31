@@ -2,7 +2,7 @@ import { Coord2 } from "./Coord2";
 import { Coord3 } from "./Coord3";
 import { GameMode } from "./GameMode";
 import { Piece } from "./Piece";
-import { waitMs, range, randomElement, parallel } from "./functions";
+import { waitMs, range, randomElement, parallel, queue } from "./functions";
 import { Renderer } from "./Renderer";
 
 export class Board {
@@ -262,12 +262,14 @@ export class Board {
 							// In case all colors were filtered out
 						) || this.existingColors()[0],
 				});
-				this.queuedPiece.move(Board.queuePosition, 500);
+				yield* this.queuedPiece.makeMoveCoroutine(Board.queuePosition, 500);
 				// Slowly cloak it.
+				// This is done in the piece itself, since just yeild* here would ignore all input until done.
+				// TODO: Come up with something more manageable.
 				this.queuedPiece.setCloaked(true, 10000);
 
 				// Reset the picked piece.
-				this.pickedPiece.setCloaked(true);
+				yield* this.pickedPiece.makeCloakCoroutine(true);
 				this.pickedPiece = undefined;
 			}
 			yield;
@@ -276,6 +278,7 @@ export class Board {
 
 	*initializationCoroutine() {
 		// Add initial pieces.
+		const pieceAnimations: Array<IterableIterator<void>> = [];
 		for (let i = 0; i < Board.size.x * Board.size.y * 0.75; ++i) {
 			const color = randomElement(this.allColors())!;
 			const index = this.getFreePieceIndex() || 0;
@@ -291,15 +294,19 @@ export class Board {
 				position: this.spawnPosition(newPosition),
 				color,
 			});
-			piece.move(newPosition, 1000);
-			piece.wait(1000);
-			piece.setCloaked(true, 2000);
-			this.pieces[index] = piece;
 
-			yield* waitMs(100);
+			pieceAnimations.push(
+				queue([
+					waitMs(100 * i),
+					piece.makeMoveCoroutine(newPosition, 1000),
+					waitMs(1000),
+					piece.makeCloakCoroutine(true, 2000),
+				]),
+			);
+			this.pieces[index] = piece;
 		}
 
-		yield* waitMs(2000);
+		yield* parallel(pieceAnimations);
 
 		// There must be a queued up piece to play.
 		this.queuedPiece = new Piece({
@@ -310,6 +317,7 @@ export class Board {
 		yield* this.queuedPiece.makeMoveCoroutine(Board.queuePosition, 500);
 
 		// Slowly cloak it.
+		// TODO: Having this in the piece itself smells bad.
 		this.queuedPiece.setCloaked(true, 10000);
 	}
 
