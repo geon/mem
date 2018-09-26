@@ -117,14 +117,21 @@ export class Board {
 				x: (Board.size.x - 1) / 2,
 				y: (Board.size.y - 1) / 2,
 			});
-			// With a small offset to make it deterministic.
-			center.x += 0.1;
-			center.x += 0.2;
+
+			const vectorA = Coord2.subtract(Board.indexToCoord(a), center);
+			const vectorB = Coord2.subtract(Board.indexToCoord(b), center);
 
 			// Order by distance.
-			const A = Coord2.distance(Board.indexToCoord(a), center);
-			const B = Coord2.distance(Board.indexToCoord(b), center);
-			return A - B;
+			const distanceDiff = vectorA.length() - vectorB.length();
+			if (Math.abs(distanceDiff) > 0.0001) {
+				return distanceDiff;
+			}
+
+			// Order by angle.
+			const angleA = Math.atan2(vectorA.y, vectorA.x);
+			const angleB = Math.atan2(vectorB.y, vectorB.x);
+			const angleDiff = angleA - angleB;
+			return angleDiff;
 		});
 
 		for (const index of pieceAddOrder) {
