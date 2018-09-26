@@ -32,14 +32,18 @@ export function* animateInterpolation(
 export function* parallel(
 	branches: ReadonlyArray<IterableIterator<void>>,
 ): IterableIterator<void> {
-	let incompleteBranches = branches.slice();
-	while (incompleteBranches.length) {
+	for (;;) {
 		const deltaTime: number = yield;
 
-		for (let i = 0; i < incompleteBranches.length; ++i) {
-			if (incompleteBranches[i].next(deltaTime).done) {
-				incompleteBranches.splice(i, 1);
+		let someLeft = false;
+		for (const branch of branches) {
+			if (!branch.next(deltaTime).done) {
+				someLeft = true;
 			}
+		}
+
+		if (!someLeft) {
+			break;
 		}
 	}
 }
