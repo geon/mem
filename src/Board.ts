@@ -339,9 +339,10 @@ export class Board {
 			pieceAnimations.push(
 				queue([
 					waitMs(100 * i),
-					piece.makeMoveCoroutine(newPosition, 1000),
-					waitMs(1000),
-					piece.makeCloakCoroutine(true, 2000),
+					parallel([
+						piece.makeMoveCoroutine(newPosition, 750, easings.easeOutCubic),
+						queue([waitMs(3000), piece.makeCloakCoroutine(true, 500)]),
+					]),
 				]),
 			);
 			this.pieces[index] = piece;
