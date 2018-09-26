@@ -237,9 +237,15 @@ export class Board {
 
 					yield* parallel([
 						this.queuedPiece.makeMoveCoroutine(newPosition, 500),
-						this.queuedPiece.makeCloakCoroutine(true, 500),
 						this.pickedPiece.makeMoveCoroutine(pickedPieceOldPosition, 500),
-						this.pickedPiece.makeCloakCoroutine(true, 500),
+						queue([
+							waitMs(250),
+							this.queuedPiece.makeCloakCoroutine(true, 750),
+						]),
+						queue([
+							waitMs(250),
+							this.pickedPiece.makeCloakCoroutine(true, 750),
+						]),
 					]);
 					this.pieces[index] = this.queuedPiece;
 				}
