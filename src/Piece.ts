@@ -1,6 +1,7 @@
 import { Coord3 } from "./Coord3";
 import { Renderer } from "./Renderer";
 import { animateInterpolation, easings, queue } from "./functions";
+import * as twgl from "twgl.js";
 
 export class Piece {
 	renderer: Renderer;
@@ -70,12 +71,36 @@ export class Piece {
 	}
 
 	draw() {
+		const easedCloakFactor = easings.inOutCubic(this.cloakFactor);
+
 		if (this.cloakFactor < 1) {
-			this.renderer.drawSphere(this.color, this.position);
+			this.renderer.drawSphere(
+				this.color,
+				this.position,
+				transform(easedCloakFactor, false),
+			);
 		}
 
 		if (this.cloakFactor > 0) {
-			this.renderer.drawCloak(this.position, this.cloakFactor);
+			this.renderer.drawSphere(
+				undefined,
+				this.position,
+				transform(easedCloakFactor, true),
+			);
 		}
 	}
+}
+
+function transform(cloakFactor: number, cloak: boolean) {
+	const sphereRadius = 0.5;
+	const translate = twgl.m4.translation([
+		0,
+		0,
+		(cloak ? -cloakFactor : 1 - cloakFactor) * sphereRadius,
+	]);
+	const scaleFactor = cloak ? cloakFactor : 1 - cloakFactor;
+	const scale = twgl.m4.scaling([scaleFactor, scaleFactor, scaleFactor]);
+	const rotate = twgl.m4.rotationY(Math.PI * cloakFactor);
+
+	return twgl.m4.multiply(rotate, twgl.m4.multiply(translate, scale));
 }
