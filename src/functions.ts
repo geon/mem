@@ -48,9 +48,11 @@ export function* parallel(
 	}
 }
 
-export function* queue(steps:ReadonlyArray<IterableIterator<void>>): IterableIterator<void> {
+export function* queue(
+	steps: ReadonlyArray<IterableIterator<void>>,
+): IterableIterator<void> {
 	for (const step of steps) {
-		yield *step;
+		yield* step;
 	}
 }
 
