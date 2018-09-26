@@ -69,6 +69,10 @@ export const easings = {
 		t--;
 		return c * (t * t * t + 1) + b;
 	},
+	easeInCubic: (t: number, b = 0, c = 1, d = 1) => {
+		t /= d;
+		return c * t * t * t + b;
+	},
 };
 
 export function* range(from: number, to: number): IterableIterator<number> {

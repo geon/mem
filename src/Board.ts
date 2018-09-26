@@ -2,7 +2,14 @@ import { Coord2 } from "./Coord2";
 import { Coord3 } from "./Coord3";
 import { GameMode } from "./GameMode";
 import { Piece } from "./Piece";
-import { waitMs, range, randomElement, parallel, queue } from "./functions";
+import {
+	waitMs,
+	range,
+	randomElement,
+	parallel,
+	queue,
+	easings,
+} from "./functions";
 import { Renderer } from "./Renderer";
 
 export class Board {
@@ -59,6 +66,13 @@ export class Board {
 		return Coord3.add(
 			position,
 			new Coord3({ x: 0, y: 0, z: this.renderer.cameraDistance + 1 }),
+		);
+	}
+
+	removePosition(position: Coord3) {
+		return Coord3.add(
+			position,
+			new Coord3({ x: 0, y: Board.size.y / -2, z: 0 }),
 		);
 	}
 
@@ -205,6 +219,20 @@ export class Board {
 
 					// Notify the game mode.
 					this.gameMode.onUnlockedPair(this);
+
+					// Animate removal of the pair.
+					yield* parallel([
+						this.pickedPiece.makeMoveCoroutine(
+							this.removePosition(this.pickedPiece.position),
+							200,
+							easings.easeInCubic,
+						),
+						this.queuedPiece.makeMoveCoroutine(
+							this.removePosition(this.queuedPiece.position),
+							200,
+							easings.easeInCubic,
+						),
+					]);
 
 					// Remove the picked piece from the board.
 					this.pieces = this.pieces.map(
